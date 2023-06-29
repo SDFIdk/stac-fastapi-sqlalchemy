@@ -37,8 +37,7 @@ class Collection(BaseModel):  # type:ignore
     """Collection orm model."""
 
     __tablename__ = "collections"
-    __table_args__ = {"schema": "stac_api"
-    }
+    __table_args__ = {"schema": "stac_api"}
 
     id = sa.Column(sa.VARCHAR(1024), nullable=False, primary_key=True)
     stac_version = sa.Column(sa.VARCHAR(300))
