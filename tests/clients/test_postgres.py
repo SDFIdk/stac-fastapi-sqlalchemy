@@ -15,7 +15,7 @@ from stac_fastapi.sqlalchemy.transactions import (
 )
 from tests.conftest import MockStarletteRequest
 
-
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_collection(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -30,6 +30,7 @@ def test_create_collection(
     assert coll["id"] == data["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_collection_already_exists(
     postgres_transactions: TransactionsClient,
     load_test_data: Callable,
@@ -41,6 +42,7 @@ def test_create_collection_already_exists(
         postgres_transactions.create_collection(data, request=MockStarletteRequest)
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_update_collection(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -56,6 +58,7 @@ def test_update_collection(
     assert "new keyword" in coll["keywords"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_delete_collection(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -72,6 +75,7 @@ def test_delete_collection(
         postgres_core.get_collection(deleted["id"], request=MockStarletteRequest)
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_get_collection(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -86,6 +90,7 @@ def test_get_collection(
     assert coll["id"] == data["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_get_item(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -108,6 +113,7 @@ def test_get_item(
     assert coll["collection"] == data["collection"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_get_collection_items(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -131,6 +137,7 @@ def test_get_collection_items(
         assert item["collection"] == coll["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_item(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -148,6 +155,7 @@ def test_create_item(
     ) == Item(**resp).dict(exclude={"links": ..., "properties": {"created", "updated"}})
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_item_already_exists(
     postgres_transactions: TransactionsClient,
     load_test_data: Callable,
@@ -164,6 +172,7 @@ def test_create_item_already_exists(
         )
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_duplicate_item_different_collections(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -206,6 +215,7 @@ def test_create_duplicate_item_different_collections(
     ) == Item(**resp).dict(exclude={"links": ..., "properties": {"created", "updated"}})
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_update_item(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -228,6 +238,7 @@ def test_update_item(
     assert updated_item["properties"]["foo"] == "bar"
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_update_geometry(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -250,6 +261,7 @@ def test_update_geometry(
     assert updated_item["geometry"]["coordinates"] == item["geometry"]["coordinates"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_delete_item(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -271,6 +283,7 @@ def test_delete_item(
         )
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_bulk_item_insert(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -302,6 +315,7 @@ def test_bulk_item_insert(
         )
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_bulk_item_insert_chunked(
     postgres_transactions: TransactionsClient,
     postgres_bulk_transactions: BulkTransactionsClient,
@@ -326,6 +340,7 @@ def test_bulk_item_insert_chunked(
         )
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_feature_collection_insert(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
@@ -357,6 +372,7 @@ def test_feature_collection_insert(
         )
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_landing_page_no_collection_title(
     postgres_core: CoreCrudClient,
     postgres_transactions: TransactionsClient,
