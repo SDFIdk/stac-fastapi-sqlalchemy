@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from random import randint
 from urllib.parse import parse_qs, urlparse, urlsplit
 
+import pytest
 import pystac
 from pydantic.datetime_parse import parse_datetime
 from pystac.utils import datetime_to_str
@@ -17,6 +18,7 @@ from stac_fastapi.types.rfc3339 import rfc3339_str_to_datetime
 from stac_fastapi.sqlalchemy.core import CoreCrudClient
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_and_delete_item(app_client, load_test_data):
     """Test creation and deletion of a single item (transactions extension)"""
     test_item = load_test_data("test_item.json")
@@ -31,6 +33,7 @@ def test_create_and_delete_item(app_client, load_test_data):
     assert resp.status_code == 200
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_item_conflict(app_client, load_test_data):
     """Test creation of an item which already exists (transactions extension)"""
     test_item = load_test_data("test_item.json")
@@ -45,6 +48,7 @@ def test_create_item_conflict(app_client, load_test_data):
     assert resp.status_code == 409
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_item_duplicate(app_client, load_test_data):
     """Test creation of an item id which already exists but in a different collection(transactions extension)"""
 
@@ -76,6 +80,7 @@ def test_create_item_duplicate(app_client, load_test_data):
     assert resp.status_code == 200
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_delete_item_duplicate(app_client, load_test_data):
     """Test creation of an item id which already exists but in a different collection(transactions extension)"""
 
@@ -120,6 +125,7 @@ def test_delete_item_duplicate(app_client, load_test_data):
     assert resp.status_code == 409
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_update_item_duplicate(app_client, load_test_data):
     """Test creation of an item id which already exists but in a different collection(transactions extension)"""
 
@@ -182,6 +188,7 @@ def test_update_item_duplicate(app_client, load_test_data):
     assert item["properties"]["gsd"] == 16
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_delete_missing_item(app_client, load_test_data):
     """Test deletion of an item which does not exist (transactions extension)"""
     test_item = load_test_data("test_item.json")
@@ -189,6 +196,7 @@ def test_delete_missing_item(app_client, load_test_data):
     assert resp.status_code == 404
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_item_missing_collection(app_client, load_test_data):
     """Test creation of an item without a parent collection (transactions extension)"""
     test_item = load_test_data("test_item.json")
@@ -199,6 +207,7 @@ def test_create_item_missing_collection(app_client, load_test_data):
     assert resp.status_code == 424
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_update_item_already_exists(app_client, load_test_data):
     """Test updating an item which already exists (transactions extension)"""
     test_item = load_test_data("test_item.json")
@@ -217,6 +226,7 @@ def test_update_item_already_exists(app_client, load_test_data):
     assert updated_item["properties"]["gsd"] == 16
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_update_new_item(app_client, load_test_data):
     """Test updating an item which does not exist (transactions extension)"""
     test_item = load_test_data("test_item.json")
@@ -227,6 +237,7 @@ def test_update_new_item(app_client, load_test_data):
     assert resp.status_code == 404
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_update_item_missing_collection(app_client, load_test_data):
     """Test updating an item without a parent collection (transactions extension)"""
     test_item = load_test_data("test_item.json")
@@ -246,6 +257,7 @@ def test_update_item_missing_collection(app_client, load_test_data):
     assert resp.status_code == 404
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_update_item_geometry(app_client, load_test_data):
     test_item = load_test_data("test_item.json")
 
@@ -273,6 +285,7 @@ def test_update_item_geometry(app_client, load_test_data):
     ]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_get_item(app_client, load_test_data):
     """Test read an item by id (core)"""
     test_item = load_test_data("test_item.json")
@@ -287,6 +300,7 @@ def test_get_item(app_client, load_test_data):
     assert get_item.status_code == 200
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_returns_valid_item(app_client, load_test_data):
     """Test validates fetched item with jsonschema"""
     test_item = load_test_data("test_item.json")
@@ -308,6 +322,7 @@ def test_returns_valid_item(app_client, load_test_data):
     item.validate()
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_get_item_collection(app_client, load_test_data):
     """Test read an item collection (core)"""
     item_count = randint(1, 4)
@@ -328,6 +343,7 @@ def test_get_item_collection(app_client, load_test_data):
     assert item_collection["context"]["matched"] == len(range(item_count))
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_pagination(app_client, load_test_data):
     """Test item collection pagination (paging extension)"""
     item_count = 10
@@ -355,6 +371,7 @@ def test_pagination(app_client, load_test_data):
     assert second_page["context"]["returned"] == 3
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_timestamps(app_client, load_test_data):
     """Test created and updated timestamps (common metadata)"""
     test_item = load_test_data("test_item.json")
@@ -383,6 +400,7 @@ def test_item_timestamps(app_client, load_test_data):
     assert parse_datetime(updated_item["properties"]["updated"]) > created_dt
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_by_id_post(app_client, load_test_data):
     """Test POST search by item id (core)"""
     ids = ["test1", "test2", "test3"]
@@ -402,6 +420,7 @@ def test_item_search_by_id_post(app_client, load_test_data):
     assert set([feat["id"] for feat in resp_json["features"]]) == set(ids)
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_spatial_query_post(app_client, load_test_data):
     """Test POST search with spatial query (core)"""
     test_item = load_test_data("test_item.json")
@@ -420,6 +439,7 @@ def test_item_search_spatial_query_post(app_client, load_test_data):
     assert resp_json["features"][0]["id"] == test_item["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_temporal_query_post(app_client, load_test_data):
     """Test POST search with single-tailed spatio-temporal query (core)"""
     test_item = load_test_data("test_item.json")
@@ -441,6 +461,7 @@ def test_item_search_temporal_query_post(app_client, load_test_data):
     assert resp_json["features"][0]["id"] == test_item["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_temporal_window_post(app_client, load_test_data):
     """Test POST search with two-tailed spatio-temporal query (core)"""
     test_item = load_test_data("test_item.json")
@@ -463,6 +484,7 @@ def test_item_search_temporal_window_post(app_client, load_test_data):
     assert resp_json["features"][0]["id"] == test_item["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_temporal_open_window(app_client, load_test_data):
     """Test POST search with open spatio-temporal query (core)"""
     test_item = load_test_data("test_item.json")
@@ -476,6 +498,7 @@ def test_item_search_temporal_open_window(app_client, load_test_data):
         assert resp.status_code == 400
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_sort_post(app_client, load_test_data):
     """Test POST search with sorting (sort extension)"""
     first_item = load_test_data("test_item.json")
@@ -505,6 +528,7 @@ def test_item_search_sort_post(app_client, load_test_data):
     assert resp_json["features"][1]["id"] == second_item["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_by_id_get(app_client, load_test_data):
     """Test GET search by item id (core)"""
     ids = ["test1", "test2", "test3"]
@@ -524,6 +548,7 @@ def test_item_search_by_id_get(app_client, load_test_data):
     assert set([feat["id"] for feat in resp_json["features"]]) == set(ids)
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_bbox_get(app_client, load_test_data):
     """Test GET search with spatial query (core)"""
     test_item = load_test_data("test_item.json")
@@ -542,6 +567,7 @@ def test_item_search_bbox_get(app_client, load_test_data):
     assert resp_json["features"][0]["id"] == test_item["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_get_without_collections(app_client, load_test_data):
     """Test GET search without specifying collections"""
     test_item = load_test_data("test_item.json")
@@ -559,6 +585,7 @@ def test_item_search_get_without_collections(app_client, load_test_data):
     assert resp_json["features"][0]["id"] == test_item["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_temporal_window_get(app_client, load_test_data):
     """Test GET search with spatio-temporal query (core)"""
     test_item = load_test_data("test_item.json")
@@ -581,6 +608,7 @@ def test_item_search_temporal_window_get(app_client, load_test_data):
     assert resp_json["features"][0]["id"] == test_item["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_sort_get(app_client, load_test_data):
     """Test GET search with sorting (sort extension)"""
     first_item = load_test_data("test_item.json")
@@ -606,6 +634,7 @@ def test_item_search_sort_get(app_client, load_test_data):
     assert resp_json["features"][1]["id"] == second_item["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_post_without_collection(app_client, load_test_data):
     """Test POST search without specifying a collection"""
     test_item = load_test_data("test_item.json")
@@ -623,6 +652,7 @@ def test_item_search_post_without_collection(app_client, load_test_data):
     assert resp_json["features"][0]["id"] == test_item["id"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_properties_jsonb(app_client, load_test_data):
     """Test POST search with JSONB query (query extension)"""
     test_item = load_test_data("test_item.json")
@@ -639,6 +669,7 @@ def test_item_search_properties_jsonb(app_client, load_test_data):
     assert len(resp_json["features"]) == 0
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_properties_field(app_client, load_test_data):
     """Test POST search indexed field with query (query extension)"""
     test_item = load_test_data("test_item.json")
@@ -655,6 +686,7 @@ def test_item_search_properties_field(app_client, load_test_data):
     assert len(resp_json["features"]) == 0
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_get_query_extension(app_client, load_test_data):
     """Test GET search with JSONB query (query extension)"""
     test_item = load_test_data("test_item.json")
@@ -685,6 +717,7 @@ def test_item_search_get_query_extension(app_client, load_test_data):
     )
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_item_search_pagination(app_client, load_test_data):
     """Test format of pagination links on a GET search"""
     test_item = load_test_data("test_item.json")
@@ -719,6 +752,7 @@ def test_get_missing_item_collection(app_client):
     assert resp.status_code == 404
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_pagination_item_collection(app_client, load_test_data):
     """Test item collection pagination links (paging extension)"""
     test_item = load_test_data("test_item.json")
@@ -760,6 +794,7 @@ def test_pagination_item_collection(app_client, load_test_data):
     assert not set(item_ids) - set(ids)
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_pagination_post(app_client, load_test_data):
     """Test POST pagination (paging extension)"""
     test_item = load_test_data("test_item.json")
@@ -798,6 +833,7 @@ def test_pagination_post(app_client, load_test_data):
     assert not set(item_ids) - set(ids)
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_pagination_token_idempotent(app_client, load_test_data):
     """Test that pagination tokens are idempotent (paging extension)"""
     test_item = load_test_data("test_item.json")
@@ -833,6 +869,7 @@ def test_pagination_token_idempotent(app_client, load_test_data):
     ]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_field_extension_get(app_client, load_test_data):
     """Test GET search with included fields (fields extension)"""
     test_item = load_test_data("test_item.json")
@@ -847,6 +884,7 @@ def test_field_extension_get(app_client, load_test_data):
     assert not set(feat_properties) - {"proj:epsg", "gsd", "datetime"}
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_field_extension_post(app_client, load_test_data):
     """Test POST search with included and excluded fields (fields extension)"""
     test_item = load_test_data("test_item.json")
@@ -872,6 +910,7 @@ def test_field_extension_post(app_client, load_test_data):
     }
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_field_extension_exclude_and_include(app_client, load_test_data):
     """Test POST search including/excluding same field (fields extension)"""
     test_item = load_test_data("test_item.json")
@@ -892,6 +931,7 @@ def test_field_extension_exclude_and_include(app_client, load_test_data):
     assert "eo:cloud_cover" not in resp_json["features"][0]["properties"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_field_extension_exclude_default_includes(app_client, load_test_data):
     """Test POST search excluding a forbidden field (fields extension)"""
     test_item = load_test_data("test_item.json")
@@ -980,6 +1020,7 @@ def test_search_datetime_validation_errors(app_client):
         assert resp.status_code == 400
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_get_item_forwarded_header(app_client, load_test_data):
     test_item = load_test_data("test_item.json")
     app_client.post(f"/collections/{test_item['collection']}/items", json=test_item)
@@ -991,6 +1032,7 @@ def test_get_item_forwarded_header(app_client, load_test_data):
         assert link["href"].startswith("https://testserver:1234/")
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_get_item_x_forwarded_headers(app_client, load_test_data):
     test_item = load_test_data("test_item.json")
     app_client.post(f"/collections/{test_item['collection']}/items", json=test_item)
@@ -1005,6 +1047,7 @@ def test_get_item_x_forwarded_headers(app_client, load_test_data):
         assert link["href"].startswith("https://testserver:1234/")
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_get_item_duplicate_forwarded_headers(app_client, load_test_data):
     test_item = load_test_data("test_item.json")
     app_client.post(f"/collections/{test_item['collection']}/items", json=test_item)

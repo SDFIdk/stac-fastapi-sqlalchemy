@@ -146,11 +146,11 @@ def api_client(db_session):
     )
 
 
-#@pytest.fixture
-@pytest.mark.skip(reason="Database is readonly")
+@pytest.fixture
 def app_client(api_client, load_test_data, postgres_transactions):
-    coll = load_test_data("test_collection.json")
-    postgres_transactions.create_collection(coll, request=MockStarletteRequest)
+    # Database is readonly
+    #coll = load_test_data("test_collection.json")
+    #postgres_transactions.create_collection(coll, request=MockStarletteRequest)
 
     with TestClient(api_client.app) as test_app:
         yield test_app
