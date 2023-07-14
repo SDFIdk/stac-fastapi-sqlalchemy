@@ -140,7 +140,7 @@ class PaginationToken(BaseModel):  # type:ignore
     """Pagination orm model."""
 
     __tablename__ = "tokens"
-    __table_args__ = {"schema": "stac_api"}
+    __table_args__ = {"schema": "data"}
 
     id = sa.Column(sa.VARCHAR(100), nullable=False, primary_key=True)
     keyset = sa.Column(sa.VARCHAR(1000), nullable=False)
