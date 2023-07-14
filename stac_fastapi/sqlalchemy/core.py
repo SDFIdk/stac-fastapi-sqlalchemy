@@ -16,7 +16,8 @@ from shapely.geometry import Polygon as ShapelyPolygon
 from shapely.geometry import shape
 from sqlakeyset import get_page
 from sqlalchemy import func
-from sqlalchemy.orm import Session as SqlSession
+from sqlalchemy.dialects.postgresql import array
+from sqlalchemy.orm import Session as SqlSession, with_expression
 from stac_fastapi.types.config import Settings
 from stac_fastapi.types.core import BaseCoreClient
 from stac_fastapi.types.errors import NotFoundError
@@ -59,6 +60,32 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         if not row:
             raise NotFoundError(f"{table.__name__} {id} not found")
         return row
+    
+
+    def _bbox_expression(self):
+    #def _bbox_expression(self, to_srid: int):
+        """Returns Ad Hoc SQL expression which can be applied to a "deferred expression" attribute.
+        We don't have bbox as a column in the database, but we imitate with query_expression() and with_expression().
+        with_expression() needs to be triggered for it to be made Ad Hoc
+        The expression makes sure the BBOX is returned in the requested SRID."""
+        # if to_srid != self.storage_srid:
+        #     geom = ga.func.ST_Transform(self.item_table.footprint, to_srid)
+        # else:
+        #     geom = self.item_table.footprint
+        geom = self.item_table.footprint
+
+        return with_expression(
+            self.item_table.bbox,
+            array(
+                [
+                    ga.func.ST_XMin(ga.func.ST_Envelope(geom)),
+                    ga.func.ST_YMin(ga.func.ST_Envelope(geom)),
+                    ga.func.ST_XMax(ga.func.ST_Envelope(geom)),
+                    ga.func.ST_YMax(ga.func.ST_Envelope(geom)),
+                ]
+            ),
+        )
+
 
     def all_collections(self, **kwargs) -> Collections:
         """Read all collections from the database."""

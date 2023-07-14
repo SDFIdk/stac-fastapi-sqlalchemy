@@ -75,6 +75,8 @@ class Item(BaseModel):  # type:ignore
     #    GeojsonGeometry("GEOMETRY", srid=4326, spatial_index=True), nullable=True
     #)
     #bbox = sa.Column(sa.ARRAY(sa.NUMERIC), nullable=True)
+    # We don't have bbox as a column in the database, but we imitate with query_expression() and with_expression().
+    # with_expression() needs to be triggered for it to be made Ad Hoc
     bbox = query_expression(
         default_expr=sa.Column(sa.ARRAY(sa.NUMERIC), nullable=False)
     )
