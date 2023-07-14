@@ -353,9 +353,14 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         base_url = str(kwargs["request"].base_url)
         with self.session.reader.context_session() as session:
             token = (
-                self.get_token(search_request.token) if search_request.token else False
+                # We create tokens on the fly
+                #self.get_token(search_request.token) if search_request.token else False
+                self.from_token(search_request.token) if search_request.token else False
             )
             query = session.query(self.item_table)
+
+            #query = query.options(self._bbox_expression(output_srid))
+            query = query.options(self._bbox_expression())
 
             # Filter by collection
             count = None
@@ -396,12 +401,16 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 if self.extension_is_enabled("ContextExtension"):
                     count = len(search_request.ids)
                 page.next = (
-                    self.insert_token(keyset=page.paging.bookmark_next)
+                    # We don't insert tokens into the database
+                    #self.insert_token(keyset=page.paging.bookmark_next)
+                    self.to_token(keyset=page.paging.bookmark_next)
                     if page.paging.has_next
                     else None
                 )
                 page.previous = (
-                    self.insert_token(keyset=page.paging.bookmark_previous)
+                    # We don't insert tokens into the database
+                    #self.insert_token(keyset=page.paging.bookmark_previous)
+                    self.to_token(keyset=page.paging.bookmark_previous)
                     if page.paging.has_previous
                     else None
                 )
@@ -467,12 +476,16 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 page = get_page(query, per_page=search_request.limit, page=token)
                 # Create dynamic attributes for each page
                 page.next = (
-                    self.insert_token(keyset=page.paging.bookmark_next)
+                    # We don't insert tokens into the database
+                    #self.insert_token(keyset=page.paging.bookmark_next)
+                    self.to_token(keyset=page.paging.bookmark_next)
                     if page.paging.has_next
                     else None
                 )
                 page.previous = (
-                    self.insert_token(keyset=page.paging.bookmark_previous)
+                    # We don't insert tokens into the database
+                    #self.insert_token(keyset=page.paging.bookmark_previous)
+                    self.to_token(keyset=page.paging.bookmark_previous)
                     if page.paging.has_previous
                     else None
                 )

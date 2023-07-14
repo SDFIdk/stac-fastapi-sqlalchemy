@@ -2,7 +2,7 @@
 import abc
 import logging
 import os
-from base64 import urlsafe_b64encode
+from base64 import urlsafe_b64encode, urlsafe_b64decode
 from typing import Type
 
 import attr
@@ -53,3 +53,19 @@ class PaginationTokenClient(abc.ABC):
         with self.session.reader.context_session() as session:
             token = self._lookup_id(token_id, self.token_table, session)
             return token.keyset
+
+    """Pagination token operations."""
+    """
+        We don't have a pagination_token in a table, but we generate it on the fly
+    """
+
+    def to_token(self, keyset: str) -> str:  # type:ignore
+        """Transform a keyset to a token."""
+        # for now just encode the keyset and return it
+        return urlsafe_b64encode(
+            keyset.encode(encoding="utf-8", errors="strict")
+        ).decode("utf-8")
+
+    def from_token(self, token_id: str) -> str:
+        """Transform a token to a keyset."""
+        return urlsafe_b64decode(token_id).decode("utf-8")
