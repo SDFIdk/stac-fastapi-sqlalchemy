@@ -63,16 +63,34 @@ class ItemSerializer(Serializer):
             collection_id=collection_id, item_id=item_id, base_url=base_url
         ).create_links()
 
-        db_links = db_model.links
-        if db_links:
-            item_links += resolve_links(db_links, base_url)
+        # We don't save the links in the database, but create them on the fly
+        #db_links = db_model.links
+        add_links = [
+            {
+                "rel": "license",
+                "href": "https://dataforsyningen.dk/Vilkaar",
+                "type": "text/html; charset=UTF-8",
+                "title": "SDFI license terms",
+            }
+        ]
 
-        stac_extensions = db_model.stac_extensions or []
+        if add_links:
+            item_links += resolve_links(add_links, base_url)
+
+        # We don't save the stac_extensions in the database, but add them on the fly
+        # stac_extensions = db_model.stac_extensions or []
+        stac_extensions = [
+            "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+            "https://stac-extensions.github.io/projection/v1.0.0/schema.json",
+            "https://raw.githubusercontent.com/stac-extensions/perspective-imagery/main/json-schema/schema.json",  # TODO: Change when published...
+        ]
 
         # The custom geometry we are using emits geojson if the geometry is bound to the database
         # Otherwise it will return a geoalchemy2 WKBElement
         # TODO: It's probably best to just remove the custom geometry type
-        geometry = db_model.geometry
+        # Geometry is named footprint in the database
+        #geometry = db_model.geometry
+        geometry = db_model.footprint
         if isinstance(geometry, ga.elements.WKBElement):
             geometry = ga.shape.to_shape(geometry).__geo_interface__
         if isinstance(geometry, str):
