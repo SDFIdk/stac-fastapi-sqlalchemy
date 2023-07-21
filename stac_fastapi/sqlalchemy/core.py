@@ -21,6 +21,7 @@ from sqlalchemy.orm import Session as SqlSession, with_expression
 from stac_fastapi.types.config import Settings
 from stac_fastapi.types.core import BaseCoreClient
 from stac_fastapi.types.errors import NotFoundError
+from stac_fastapi.types.links import BaseHrefBuilder
 from stac_fastapi.types.search import BaseSearchPostRequest
 from stac_fastapi.types.stac import Collection, Collections, Item, ItemCollection
 from stac_pydantic.links import Relations
@@ -85,6 +86,14 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 ]
             ),
         )
+    
+
+    def href_builder(self, **kwargs):
+        """Override with HrefBuilder which adds API token to all hrefs if present"""
+        request = kwargs["request"]
+        base_url = str(request.base_url)
+        token = request.query_params.get("token")
+        return BaseHrefBuilder(base_url, token)
 
 
     def all_collections(self, **kwargs) -> Collections:
@@ -131,7 +140,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         bbox: Optional[List[NumType]] = None,
         datetime: Optional[str] = None,
         limit: int = 10,
-        token: str = None,
+        pt: str = None,
         **kwargs,
     ) -> ItemCollection:
         """Read an item collection from the database."""
@@ -184,16 +193,22 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     [func.count()]
                 ).order_by(None)
                 count = query.session.execute(count_query).scalar()
-            token = self.get_token(token) if token else token
-            page = get_page(query, per_page=limit, page=(token or False))
+            #token = self.get_token(token) if token else token
+            pagination_token = (self.from_token(pt) if pt else pt)
+            #page = get_page(query, per_page=limit, page=(token or False))
+            page = get_page(query, per_page=limit, page=(pagination_token or False))
             # Create dynamic attributes for each page
             page.next = (
-                self.insert_token(keyset=page.paging.bookmark_next)
+                # We don't insert tokens into the database
+                #self.insert_token(keyset=page.paging.bookmark_next)
+                self.to_token(keyset=page.paging.bookmark_next)
                 if page.paging.has_next
                 else None
             )
             page.previous = (
-                self.insert_token(keyset=page.paging.bookmark_previous)
+                # We don't insert tokens into the database
+                #self.insert_token(keyset=page.paging.bookmark_previous)
+                self.to_token(keyset=page.paging.bookmark_previous)
                 if page.paging.has_previous
                 else None
             )
@@ -220,7 +235,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     {
                         "rel": Relations.next.value,
                         "type": "application/geo+json",
-                        "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?token={page.next}&limit={limit}",
+                        "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?pt={page.next}&limit={limit}",
                         "method": "GET",
                     }
                 )
@@ -229,7 +244,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     {
                         "rel": Relations.previous.value,
                         "type": "application/geo+json",
-                        "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?token={page.previous}&limit={limit}",
+                        "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?pt={page.previous}&limit={limit}",
                         "method": "GET",
                     }
                 )
@@ -275,7 +290,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         datetime: Optional[Union[str, datetime]] = None,
         limit: Optional[int] = 10,
         query: Optional[str] = None,
-        token: Optional[str] = None,
+        pt: Optional[str] = None,
         fields: Optional[List[str]] = None,
         sortby: Optional[str] = None,
         intersects: Optional[str] = None,
@@ -288,7 +303,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             "ids": ids,
             "bbox": bbox,
             "limit": limit,
-            "token": token,
+            "pt": pt,
             "query": json.loads(unquote_plus(query)) if query else query,
         }
 
@@ -350,12 +365,16 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         self, search_request: BaseSearchPostRequest, **kwargs
     ) -> ItemCollection:
         """POST search catalog."""
-        base_url = str(kwargs["request"].base_url)
+        #base_url = str(kwargs["request"].base_url)
+        hrefbuilder = self.href_builder(**kwargs)
+        
         with self.session.reader.context_session() as session:
-            token = (
-                # We create tokens on the fly
-                #self.get_token(search_request.token) if search_request.token else False
-                self.from_token(search_request.token) if search_request.token else False
+            # We create paginating tokens on the fly
+            # token = (
+            #     self.get_token(search_request.token) if search_request.token else False
+            # )
+            pagination_token = (
+                self.from_token(search_request.pt) if search_request.pt else False
             )
             query = session.query(self.item_table)
 
@@ -397,7 +416,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     *[self.item_table.id == i for i in search_request.ids]
                 )
                 items = query.filter(id_filter).order_by(self.item_table.id)
-                page = get_page(items, per_page=search_request.limit, page=token)
+                #page = get_page(items, per_page=search_request.limit, page=token)
+                page = get_page(items, per_page=search_request.limit, page=pagination_token)
                 if self.extension_is_enabled("ContextExtension"):
                     count = len(search_request.ids)
                 page.next = (
@@ -473,7 +493,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         [func.count()]
                     ).order_by(None)
                     count = query.session.execute(count_query).scalar()
-                page = get_page(query, per_page=search_request.limit, page=token)
+                #page = get_page(query, per_page=search_request.limit, page=token)
+                page = get_page(query, per_page=search_request.limit, page=pagination_token)
                 # Create dynamic attributes for each page
                 page.next = (
                     # We don't insert tokens into the database
@@ -498,7 +519,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         "type": "application/geo+json",
                         "href": f"{kwargs['request'].base_url}search",
                         "method": "POST",
-                        "body": {"token": page.next},
+                        "body": {"pt": page.next},
                         "merge": True,
                     }
                 )
@@ -509,7 +530,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         "type": "application/geo+json",
                         "href": f"{kwargs['request'].base_url}search",
                         "method": "POST",
-                        "body": {"token": page.previous},
+                        "body": {"pt": page.previous},
                         "merge": True,
                     }
                 )
@@ -519,7 +540,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
             for item in page:
                 response_features.append(
-                    self.item_serializer.db_to_stac(item, base_url=base_url)
+                    #self.item_serializer.db_to_stac(item, base_url=base_url)
+                    self.item_serializer.db_to_stac(item, hrefbuilder=hrefbuilder)
                 )
 
             # Use pydantic includes/excludes syntax to implement fields extension

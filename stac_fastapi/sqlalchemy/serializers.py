@@ -1,17 +1,34 @@
 """Serializers."""
 import abc
 import json
-from typing import TypedDict
+from typing import Any, Dict, TypedDict
+import urllib.parse
 
 import attr
 import geoalchemy2 as ga
+
 from pystac.utils import datetime_to_str
+
+from stac_fastapi.sqlalchemy.config import SqlalchemySettings
+
 from stac_fastapi.types import stac as stac_types
 from stac_fastapi.types.config import Settings
-from stac_fastapi.types.links import CollectionLinks, ItemLinks, resolve_links
+from stac_fastapi.types.links import BaseHrefBuilder, CollectionLinks, ItemLinks, resolve_links
 from stac_fastapi.types.rfc3339 import now_to_rfc3339_str, rfc3339_str_to_datetime
 
 from stac_fastapi.sqlalchemy.models import database
+
+settings = SqlalchemySettings()
+
+def _add_query_params(url, params):
+    """Combines URL with params"""
+    if not params:
+        return url
+    url_parts = list(urllib.parse.urlparse(url))
+    query = dict(urllib.parse.parse_qsl(url_parts[4]))
+    query.update(params)
+    url_parts[4] = urllib.parse.urlencode(query)
+    return urllib.parse.urlunparse(url_parts)
 
 
 @attr.s  # type:ignore
@@ -20,7 +37,8 @@ class Serializer(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def db_to_stac(cls, db_model: database.BaseModel, base_url: str) -> TypedDict:
+    #def db_to_stac(cls, db_model: database.BaseModel, base_url: str) -> TypedDict:
+    def db_to_stac(cls, db_model: database.BaseModel, base_url: BaseHrefBuilder) -> TypedDict:
         """Transform database model to stac."""
         ...
 
@@ -47,7 +65,14 @@ class ItemSerializer(Serializer):
     """Serialization methods for STAC items."""
 
     @classmethod
-    def db_to_stac(cls, db_model: database.Item, base_url: str) -> stac_types.Item:
+    def _add_if_not_none(cls, dict: Dict, key: str, val: Any):
+        """Adds value to dictionary with specified key if value is not None"""
+        if val is not None:
+            dict[key] = val
+
+    @classmethod
+    #def db_to_stac(cls, db_model: database.Item, base_url: str) -> stac_types.Item:
+    def db_to_stac(cls, db_model: database.Item, hrefbuilder: BaseHrefBuilder) -> stac_types.Item:
         """Transform database model to stac item."""
         properties = db_model.properties.copy()
         indexed_fields = Settings.get().indexed_fields
@@ -60,8 +85,13 @@ class ItemSerializer(Serializer):
         item_id = db_model.id
         collection_id = db_model.collection_id
         item_links = ItemLinks(
-            collection_id=collection_id, item_id=item_id, base_url=base_url
+            #collection_id=collection_id, item_id=item_id, base_url=base_url
+            collection_id=collection_id, item_id=item_id, href_builder=hrefbuilder
         ).create_links()
+
+        token_param = {"token": hrefbuilder.token} if hrefbuilder.token else {}
+        cog_url = _add_query_params(db_model.data_path, token_param)
+        tiler_params = {"url": db_model.data_path, **token_param}
 
         # We don't save the links in the database, but create them on the fly
         #db_links = db_model.links
@@ -71,11 +101,22 @@ class ItemSerializer(Serializer):
                 "href": "https://dataforsyningen.dk/Vilkaar",
                 "type": "text/html; charset=UTF-8",
                 "title": "SDFI license terms",
-            }
+            },
+            {
+                "rel": "alternate",
+                "href": _add_query_params(
+                    f"{settings.cogtiler_basepath}/viewer.html", tiler_params
+                ),
+                "type": "text/html; charset=UTF-8",
+                "title": "Interactive image viewer",
+            },
         ]
 
-        if add_links:
-            item_links += resolve_links(add_links, base_url)
+        # We don't save the links in the database, but create them on the fly
+        # if add_links:
+        #     item_links += resolve_links(add_links, base_url)
+
+        item_links += add_links
 
         # We don't save the stac_extensions in the database, but add them on the fly
         # stac_extensions = db_model.stac_extensions or []
@@ -84,6 +125,23 @@ class ItemSerializer(Serializer):
             "https://stac-extensions.github.io/projection/v1.0.0/schema.json",
             "https://raw.githubusercontent.com/stac-extensions/perspective-imagery/main/json-schema/schema.json",  # TODO: Change when published...
         ]
+
+        assets = {
+            "data": {
+                "href": cog_url,
+                "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+                "roles": ["data"],
+                "title": "Raw tiff file",
+            },
+            "thumbnail": {
+                "href": _add_query_params(
+                    f"{settings.cogtiler_basepath}/thumbnail.jpg", tiler_params
+                ),
+                "type": "image/jpeg",
+                "roles": ["thumbnail"],
+                "title": "Thumbnail",
+            },
+        }
 
         # The custom geometry we are using emits geojson if the geometry is bound to the database
         # Otherwise it will return a geoalchemy2 WKBElement
@@ -100,9 +158,23 @@ class ItemSerializer(Serializer):
         if bbox is not None:
             bbox = [float(x) for x in db_model.bbox]
 
+        # Properties
+
+        # General props
+        instrument_id = db_model.camera_id  # Used here and for pers:cam_id
+        cls._add_if_not_none(properties, "gsd", db_model.gsd)
+        properties["license"] = "various"
+        cls._add_if_not_none(properties, "platform", "Fixed-wing aircraft")
+        cls._add_if_not_none(properties, "instruments", [instrument_id])
+        properties["providers"] = [
+            {"name": db_model.producer, "roles": ["producer"]},
+            {"url": "https://sdfi.dk/", "name": "SDFI", "roles": ["licensor", "host"]},
+        ]    
+
         return stac_types.Item(
             type="Feature",
-            stac_version=db_model.stac_version,
+            #stac_version=db_model.stac_version,
+            stac_version="1.0.0",
             stac_extensions=stac_extensions,
             id=db_model.id,
             collection=db_model.collection_id,
@@ -110,7 +182,8 @@ class ItemSerializer(Serializer):
             bbox=bbox,
             properties=properties,
             links=item_links,
-            assets=db_model.assets,
+            #assets=db_model.assets,
+            assets=assets,
         )
 
     @classmethod

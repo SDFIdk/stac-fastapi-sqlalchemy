@@ -23,6 +23,8 @@ class SqlalchemySettings(ApiSettings):
     postgres_port: str
     postgres_dbname: str
 
+    cogtiler_basepath: str
+
     # Fields which are defined by STAC but not included in the database model
     forbidden_fields: Set[str] = {"type"}
 
