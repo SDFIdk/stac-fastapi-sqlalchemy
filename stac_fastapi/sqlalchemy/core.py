@@ -140,6 +140,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         bbox: Optional[List[NumType]] = None,
         datetime: Optional[str] = None,
         limit: int = 10,
+        #token: str = None,
         pt: str = None,
         **kwargs,
     ) -> ItemCollection:
@@ -235,6 +236,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     {
                         "rel": Relations.next.value,
                         "type": "application/geo+json",
+                        #"href": f"{kwargs['request'].base_url}collections/{collection_id}/items?token={page.next}&limit={limit}",
                         "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?pt={page.next}&limit={limit}",
                         "method": "GET",
                     }
@@ -244,6 +246,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     {
                         "rel": Relations.previous.value,
                         "type": "application/geo+json",
+                        #"href": f"{kwargs['request'].base_url}collections/{collection_id}/items?token={page.previous}&limit={limit}",
                         "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?pt={page.previous}&limit={limit}",
                         "method": "GET",
                     }
@@ -290,6 +293,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         datetime: Optional[Union[str, datetime]] = None,
         limit: Optional[int] = 10,
         query: Optional[str] = None,
+        #token: Optional[str] = None,
         pt: Optional[str] = None,
         fields: Optional[List[str]] = None,
         sortby: Optional[str] = None,
@@ -303,6 +307,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             "ids": ids,
             "bbox": bbox,
             "limit": limit,
+            #"token": token,
             "pt": pt,
             "query": json.loads(unquote_plus(query)) if query else query,
         }
@@ -519,6 +524,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         "type": "application/geo+json",
                         "href": f"{kwargs['request'].base_url}search",
                         "method": "POST",
+                        #"body": {"token": page.next},
                         "body": {"pt": page.next},
                         "merge": True,
                     }
@@ -530,6 +536,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         "type": "application/geo+json",
                         "href": f"{kwargs['request'].base_url}search",
                         "method": "POST",
+                        #"body": {"token": page.previous},
                         "body": {"pt": page.previous},
                         "merge": True,
                     }
