@@ -5,10 +5,12 @@ from stac_fastapi.api.app import StacApi
 from stac_fastapi.api.models import create_get_request_model, create_post_request_model
 from stac_fastapi.extensions.core import (
     ContextExtension,
-    FieldsExtension,
+    CrsExtension,
+    #FieldsExtension,
+    FilterExtension,
     SortExtension,
     TokenPaginationExtension,
-    TransactionExtension,
+    #TransactionExtension,
 )
 from stac_fastapi.extensions.third_party import BulkTransactionExtension
 
@@ -24,22 +26,29 @@ from stac_fastapi.sqlalchemy.transactions import (
 settings = SqlalchemySettings()
 session = Session.create_from_settings(settings)
 extensions = [
-    TransactionExtension(client=TransactionsClient(session=session), settings=settings),
-    BulkTransactionExtension(client=BulkTransactionsClient(session=session)),
-    FieldsExtension(),
-    QueryExtension(),
+    #TransactionExtension(client=TransactionsClient(session=session), settings=settings),
+    #BulkTransactionExtension(client=BulkTransactionsClient(session=session)),
+    #FieldsExtension(),
+    #QueryExtension(),
+    FilterExtension(),
     SortExtension(),
     TokenPaginationExtension(),
     ContextExtension(),
+    CrsExtension(),
 ]
 
 post_request_model = create_post_request_model(extensions)
 
 api = StacApi(
+    # Override default title and description.
+    title="Skråfoto STAC API",
+    description="API til udstilling af metadata for flyfotos.",
     settings=settings,
     extensions=extensions,
     client=CoreCrudClient(
-        session=session, extensions=extensions, post_request_model=post_request_model
+        session=session, extensions=extensions, post_request_model=post_request_model,
+        # Override default landing_page_id
+        landing_page_id="dataforsyningen-flyfotoapi",
     ),
     search_get_request_model=create_get_request_model(extensions),
     search_post_request_model=post_request_model,
