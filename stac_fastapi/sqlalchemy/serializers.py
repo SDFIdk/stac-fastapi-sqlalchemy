@@ -227,15 +227,18 @@ class CollectionSerializer(Serializer):
     """Serialization methods for STAC collections."""
 
     @classmethod
-    def db_to_stac(cls, db_model: database.Collection, base_url: str) -> TypedDict:
+    #def db_to_stac(cls, db_model: database.Collection, base_url: str) -> TypedDict:
+    def db_to_stac(cls, db_model: database.Collection, hrefbuilder: BaseHrefBuilder) -> TypedDict:
         """Transform database model to stac collection."""
         collection_links = CollectionLinks(
-            collection_id=db_model.id, base_url=base_url
+            #collection_id=db_model.id, base_url=base_url
+            collection_id=db_model.id, href_builder=hrefbuilder
         ).create_links()
 
         db_links = db_model.links
         if db_links:
-            collection_links += resolve_links(db_links, base_url)
+            #collection_links += resolve_links(db_links, base_url)
+            collection_links += resolve_links(db_links, hrefbuilder.base_url)
 
         collection = stac_types.Collection(
             type="Collection",

@@ -98,28 +98,33 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
     def all_collections(self, **kwargs) -> Collections:
         """Read all collections from the database."""
-        base_url = str(kwargs["request"].base_url)
+        #base_url = str(kwargs["request"].base_url)
+        hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
             collections = session.query(self.collection_table).all()
             serialized_collections = [
-                self.collection_serializer.db_to_stac(collection, base_url=base_url)
+                #self.collection_serializer.db_to_stac(collection, base_url=base_url)
+                self.collection_serializer.db_to_stac(collection, hrefbuilder=hrefbuilder)
                 for collection in collections
             ]
             links = [
                 {
                     "rel": Relations.root.value,
                     "type": MimeTypes.json,
-                    "href": base_url,
+                    #"href": base_url,
+                    "href": hrefbuilder,
                 },
                 {
                     "rel": Relations.parent.value,
                     "type": MimeTypes.json,
-                    "href": base_url,
+                    #"href": base_url,
+                    "href": hrefbuilder,
                 },
                 {
                     "rel": Relations.self.value,
                     "type": MimeTypes.json,
-                    "href": urljoin(base_url, "collections"),
+                    #"href": urljoin(base_url, "collections"),
+                    "href": urljoin(hrefbuilder.base_url, "collections"),
                 },
             ]
             collection_list = Collections(
