@@ -3,7 +3,7 @@ import json
 import logging
 import operator
 from datetime import datetime
-from typing import List, Optional, Set, Type, Union
+from typing import List, Optional, Set, Type, Union, Dict, Any
 from urllib.parse import unquote_plus, urlencode, urljoin
 
 import attr
@@ -19,7 +19,7 @@ from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import array
 from sqlalchemy.orm import Session as SqlSession, with_expression
 from stac_fastapi.types.config import Settings
-from stac_fastapi.types.core import BaseCoreClient
+from stac_fastapi.types.core import BaseCoreClient, BaseFiltersClient
 from stac_fastapi.types.errors import NotFoundError
 from stac_fastapi.types.links import BaseHrefBuilder
 from stac_fastapi.types.search import BaseSearchPostRequest
@@ -28,10 +28,12 @@ from stac_pydantic.links import Relations
 from stac_pydantic.shared import MimeTypes
 
 from stac_fastapi.sqlalchemy import serializers
+from stac_fastapi.sqlalchemy.extensions.filter import QueryableTypes
 from stac_fastapi.sqlalchemy.extensions.query import Operator
 from stac_fastapi.sqlalchemy.models import database
 from stac_fastapi.sqlalchemy.session import Session
 from stac_fastapi.sqlalchemy.tokens import PaginationTokenClient
+from stac_fastapi.sqlalchemy.types.filter import Queryables
 
 logger = logging.getLogger(__name__)
 
@@ -594,3 +596,71 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             links=links,
             context=context_obj,
         )
+
+
+@attr.s
+class CoreFiltersClient(BaseFiltersClient):
+    session: Session = attr.ib(default=attr.Factory(Session.create_from_env))
+
+    def validate_collection(self, value):
+        # client = CoreCrudClient(session=self.session, collection_table=database.Collection)
+        with self.session.session_maker.context_session() as session:
+            try:
+                CoreCrudClient._lookup_id(value, database.Collection, session)
+            except:
+                raise ValueError(f"Collection '{value}' doesn't exist")
+
+    def get_queryables(
+        self, collection_id: Optional[str] = None, **kwargs
+    ) -> Dict[str, Any]:
+        """Get the queryables available for the given collection_id.
+
+        If collection_id is None, returns the intersection of all
+        queryables over all collections.
+
+        This base implementation returns a blank queryable schema. This is not allowed
+        under OGC CQL but it is allowed by the STAC API Filter Extension
+
+        https://github.com/radiantearth/stac-api-spec/tree/master/fragments/filter#queryables
+        """
+
+        base_url = str(kwargs["request"].base_url)
+        if "id" in kwargs:
+            collection_id = kwargs["id"]
+            try:
+                self.validate_collection(collection_id)
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=404,
+                    detail=["Not found"] + str(e).split("\n"),
+                )
+
+        # Check that collection exists
+
+        base_queryables, queryables = (
+            Queryables.get_queryable_properties_intersection([collection_id])
+            if collection_id
+            else Queryables.get_queryable_properties_intersection()
+        )
+
+        res = {}
+        queryables.sort()
+        for q in base_queryables + queryables:
+            q_type = getattr(QueryableTypes, Queryables.get_queryable(q).name)
+            res[q] = {
+                "description": q_type[2],
+                "$ref" if q_type[3] else "type": q_type[3] if q_type[3] else q_type[1],
+            }
+
+        return {
+            "$schema": "https://json-schema.org/draft/2019-09/schema",
+            "$id": urljoin(
+                base_url,
+                f"collections/{collection_id}/queryables"
+                if collection_id
+                else f"queryables",
+            ),
+            "type": "object",
+            "title": f"{collection_id.capitalize() if collection_id else 'Dataforsyningen FlyfotoAPI - Shared queryables'}",
+            "properties": res,
+        }

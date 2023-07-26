@@ -15,7 +15,7 @@ from stac_fastapi.extensions.core import (
 from stac_fastapi.extensions.third_party import BulkTransactionExtension
 
 from stac_fastapi.sqlalchemy.config import SqlalchemySettings
-from stac_fastapi.sqlalchemy.core import CoreCrudClient
+from stac_fastapi.sqlalchemy.core import CoreCrudClient, CoreFiltersClient
 from stac_fastapi.sqlalchemy.extensions import QueryExtension
 from stac_fastapi.sqlalchemy.session import Session
 from stac_fastapi.sqlalchemy.transactions import (
@@ -30,7 +30,7 @@ extensions = [
     #BulkTransactionExtension(client=BulkTransactionsClient(session=session)),
     #FieldsExtension(),
     #QueryExtension(),
-    FilterExtension(),
+    FilterExtension(client=CoreFiltersClient(session=session)),
     SortExtension(),
     TokenPaginationExtension(),
     ContextExtension(),
