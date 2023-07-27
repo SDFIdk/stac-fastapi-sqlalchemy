@@ -608,7 +608,7 @@ class CoreFiltersClient(BaseFiltersClient):
 
     def validate_collection(self, value):
         # client = CoreCrudClient(session=self.session, collection_table=database.Collection)
-        with self.session.session_maker.context_session() as session:
+        with self.session.reader.context_session() as session:
             try:
                 CoreCrudClient._lookup_id(value, database.Collection, session)
             except:
@@ -629,8 +629,8 @@ class CoreFiltersClient(BaseFiltersClient):
         """
 
         base_url = str(kwargs["request"].base_url)
-        if "id" in kwargs:
-            collection_id = kwargs["id"]
+        if "collection_id" in str(kwargs["request"].path_params):
+            collection_id = str(kwargs["request"].path_params["collection_id"])
             try:
                 self.validate_collection(collection_id)
             except ValueError as e:
