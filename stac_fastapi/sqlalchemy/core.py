@@ -134,12 +134,16 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             )
             return collection_list
 
+
     def get_collection(self, collection_id: str, **kwargs) -> Collection:
         """Get collection by id."""
-        base_url = str(kwargs["request"].base_url)
+        #base_url = str(kwargs["request"].base_url)
+        hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
             collection = self._lookup_id(collection_id, self.collection_table, session)
-            return self.collection_serializer.db_to_stac(collection, base_url)
+            #return self.collection_serializer.db_to_stac(collection, base_url)
+            return self.collection_serializer.db_to_stac(collection, hrefbuilder)
+
 
     def item_collection(
         self,
