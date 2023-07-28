@@ -13,10 +13,11 @@ from stac_fastapi.sqlalchemy.config import SqlalchemySettings
 
 from stac_fastapi.types import stac as stac_types
 from stac_fastapi.types.config import Settings
-from stac_fastapi.types.links import BaseHrefBuilder, CollectionLinks, ItemLinks, resolve_links
+from stac_fastapi.types.links import CollectionLinks, ItemLinks, resolve_links
 from stac_fastapi.types.rfc3339 import now_to_rfc3339_str, rfc3339_str_to_datetime
 
 from stac_fastapi.sqlalchemy.models import database
+from stac_fastapi.sqlalchemy.types.links import ApiTokenHrefBuilder
 
 settings = SqlalchemySettings()
 
@@ -38,7 +39,7 @@ class Serializer(abc.ABC):
     @classmethod
     @abc.abstractmethod
     #def db_to_stac(cls, db_model: database.BaseModel, base_url: str) -> TypedDict:
-    def db_to_stac(cls, db_model: database.BaseModel, base_url: BaseHrefBuilder) -> TypedDict:
+    def db_to_stac(cls, db_model: database.BaseModel, hrefbuilder: ApiTokenHrefBuilder) -> TypedDict:
         """Transform database model to stac."""
         ...
 
@@ -72,7 +73,7 @@ class ItemSerializer(Serializer):
 
     @classmethod
     #def db_to_stac(cls, db_model: database.Item, base_url: str) -> stac_types.Item:
-    def db_to_stac(cls, db_model: database.Item, hrefbuilder: BaseHrefBuilder) -> stac_types.Item:
+    def db_to_stac(cls, db_model: database.Item, hrefbuilder: ApiTokenHrefBuilder) -> stac_types.Item:
         """Transform database model to stac item."""
         properties = db_model.properties.copy()
         indexed_fields = Settings.get().indexed_fields
@@ -228,7 +229,7 @@ class CollectionSerializer(Serializer):
 
     @classmethod
     #def db_to_stac(cls, db_model: database.Collection, base_url: str) -> TypedDict:
-    def db_to_stac(cls, db_model: database.Collection, hrefbuilder: BaseHrefBuilder) -> TypedDict:
+    def db_to_stac(cls, db_model: database.Collection, hrefbuilder: ApiTokenHrefBuilder) -> TypedDict:
         """Transform database model to stac collection."""
         collection_links = CollectionLinks(
             #collection_id=db_model.id, base_url=base_url
