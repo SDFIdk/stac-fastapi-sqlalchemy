@@ -34,6 +34,7 @@ from stac_fastapi.sqlalchemy.models import database
 from stac_fastapi.sqlalchemy.session import Session
 from stac_fastapi.sqlalchemy.tokens import PaginationTokenClient
 from stac_fastapi.sqlalchemy.types.filter import Queryables
+from stac_fastapi.sqlalchemy.types.links import ApiTokenHrefBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -95,8 +96,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         request = kwargs["request"]
         base_url = str(request.base_url)
         token = request.query_params.get("token")
-        return BaseHrefBuilder(base_url, token)
-
+        # return BaseHrefBuilder(base_url, token)
+        return ApiTokenHrefBuilder(base_url, token)
 
     def all_collections(self, **kwargs) -> Collections:
         """Read all collections from the database."""
