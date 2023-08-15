@@ -157,7 +157,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         **kwargs,
     ) -> ItemCollection:
         """Read an item collection from the database."""
-        base_url = str(kwargs["request"].base_url)
+        # base_url = str(kwargs["request"].base_url)
+        hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
             # Look up the collection first to get a 404 if it doesn't exist
             _ = self._lookup_id(collection_id, self.collection_table, session)
@@ -167,6 +168,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 .filter(self.collection_table.id == collection_id)
                 .order_by(self.item_table.datetime.desc(), self.item_table.id)
             )
+            query = query.options(self._bbox_expression())
             # Spatial query
             geom = None
             if bbox:
@@ -267,7 +269,9 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             response_features = []
             for item in page:
                 response_features.append(
-                    self.item_serializer.db_to_stac(item, base_url=base_url)
+                    # self.item_serializer.db_to_stac(item, base_url=base_url)
+                    self.item_serializer.db_to_stac(
+                        item, hrefbuilder=hrefbuilder)
                 )
 
             context_obj = None
