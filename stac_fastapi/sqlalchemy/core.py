@@ -287,15 +287,19 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
     def get_item(self, item_id: str, collection_id: str, **kwargs) -> Item:
         """Get item by id."""
-        base_url = str(kwargs["request"].base_url)
+        # base_url = str(kwargs["request"].base_url)
+        hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
             db_query = session.query(self.item_table)
             db_query = db_query.filter(self.item_table.collection_id == collection_id)
             db_query = db_query.filter(self.item_table.id == item_id)
+            db_query = db_query.options(self._bbox_expression())
             item = db_query.first()
             if not item:
                 raise NotFoundError(f"{self.item_table.__name__} {item_id} not found")
             return self.item_serializer.db_to_stac(item, base_url=base_url)
+            # return self.item_serializer.db_to_stac(item, base_url=base_url)
+            return self.item_serializer.db_to_stac(item, hrefbuilder=hrefbuilder)
 
     def get_search(
         self,
