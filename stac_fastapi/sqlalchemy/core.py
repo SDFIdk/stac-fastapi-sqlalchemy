@@ -11,6 +11,7 @@ import geoalchemy2 as ga
 import sqlalchemy as sa
 import stac_pydantic
 from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from shapely.geometry import Polygon as ShapelyPolygon
 from shapely.geometry import shape
@@ -89,7 +90,16 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 ]
             ),
         )
-    
+
+    def create_crs_response(self, resp, crs, **kwargs) -> JSONResponse:
+        """Add Content-Crs header to JSONResponse to comply with OGC API Feat part 2"""
+        crs_ext = self.get_extension("CrsExtension")
+        if crs is None:
+            crs = crs_ext.storageCrs
+        if crs in crs_ext.crs:  # If the CRS is valid
+            return JSONResponse(resp, headers={"Content-Crs": crs})
+        else:
+            return resp
 
     def href_builder(self, **kwargs):
         """Override with HrefBuilder which adds API token to all hrefs if present"""
@@ -291,6 +301,20 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
     def get_item(self, item_id: str, collection_id: str, **kwargs) -> Item:
         """Get item by id."""
+        request = kwargs["request"]
+        req_crs = request.query_params.get("crs")
+        if req_crs and self.extension_is_enabled("CrsExtension"):
+            stac_crs = self.get_extension("CrsExtension")
+            if self.get_extension("CrsExtension").is_crs_supported(req_crs):
+                output_srid = stac_crs.epsg_from_crs(req_crs)
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="CRS provided for argument crs is invalid, valid options are: "
+                    + ",".join(self.get_extension("CrsExtension").crs),
+                )
+        else:
+            req_crs = "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
         # base_url = str(kwargs["request"].base_url)
         hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
@@ -303,8 +327,21 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 raise NotFoundError(f"{self.item_table.__name__} {item_id} not found")
             return self.item_serializer.db_to_stac(item, base_url=base_url)
             # return self.item_serializer.db_to_stac(item, base_url=base_url)
-            return self.item_serializer.db_to_stac(item, hrefbuilder=hrefbuilder)
+            resp = self.item_serializer.db_to_stac(
+                item, hrefbuilder=hrefbuilder)
 
+            if self.get_extension("CrsExtension"):
+                if (
+                    "crs" not in resp["properties"]
+                ):  # If the CRS type has not been populated to the response
+                    crs_obj = {
+                        "type": "name",
+                        "properties": {"name": f"{req_crs}"},
+                    }
+                resp["properties"]["crs"] = crs_obj
+                return self.create_crs_response(resp, req_crs)
+
+            return resp
     def get_search(
         self,
         collections: Optional[List[str]] = None,
