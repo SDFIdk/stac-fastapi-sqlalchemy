@@ -121,6 +121,11 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     collection, hrefbuilder=hrefbuilder)
                 for collection in collections
             ]
+
+            if self.extension_is_enabled("CrsExtension"):
+                for c in serialized_collections:
+                    c.update({"crs": self.get_extension("CrsExtension").crs})
+
             links = [
                 {
                     "rel": Relations.root.value,

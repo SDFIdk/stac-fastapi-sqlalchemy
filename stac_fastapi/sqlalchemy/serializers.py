@@ -307,6 +307,8 @@ class CollectionSerializer(Serializer):
             title=db_model.title,
             description=db_model.description,
             keywords=db_model.keywords,
+            storageCrs=db_model.storage_crs,
+            crs=[],  # Gets update after serialization by the crs extension
             license=db_model.license,
             providers=db_model.providers,
             summaries=db_model.summaries,
