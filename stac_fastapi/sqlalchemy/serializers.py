@@ -298,12 +298,18 @@ class CollectionSerializer(Serializer):
             #collection_links += resolve_links(db_links, base_url)
             collection_links += resolve_links(db_links, hrefbuilder.base_url)
 
+        stac_extensions = db_model.stac_extensions or []
         collection = stac_types.Collection(
             type="Collection",
             id=db_model.id,
+            stac_extensions=stac_extensions,
             stac_version=db_model.stac_version,
+            title=db_model.title,
             description=db_model.description,
+            keywords=db_model.keywords,
             license=db_model.license,
+            providers=db_model.providers,
+            summaries=db_model.summaries,
             extent=db_model.extent,
             links=collection_links,
         )
