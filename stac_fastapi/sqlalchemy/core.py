@@ -157,9 +157,18 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
             collection = self._lookup_id(collection_id, self.collection_table, session)
-            #return self.collection_serializer.db_to_stac(collection, base_url)
-            return self.collection_serializer.db_to_stac(collection, hrefbuilder)
 
+            # return self.collection_serializer.db_to_stac(collection, base_url)
+            serialized_collection = self.collection_serializer.db_to_stac(
+                collection, hrefbuilder)
+
+            # Add the list of service supported CRS to the collection
+            if self.extension_is_enabled("CrsExtension"):
+                serialized_collection.update(
+                    {"crs": self.get_extension("CrsExtension").crs}
+                )
+
+            return serialized_collection
 
     def item_collection(
         self,
