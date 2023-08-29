@@ -340,7 +340,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             item = db_query.first()
             if not item:
                 raise NotFoundError(f"{self.item_table.__name__} {item_id} not found")
-            return self.item_serializer.db_to_stac(item, base_url=base_url)
             # return self.item_serializer.db_to_stac(item, base_url=base_url)
             resp = self.item_serializer.db_to_stac(
                 item, hrefbuilder=hrefbuilder)
