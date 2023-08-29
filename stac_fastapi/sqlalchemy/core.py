@@ -11,6 +11,7 @@ import geoalchemy2 as ga
 import sqlalchemy as sa
 import stac_pydantic
 from fastapi import HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from shapely.geometry import Polygon as ShapelyPolygon
 from shapely.geometry import shape
@@ -89,15 +90,24 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 ]
             ),
         )
-    
 
-    def href_builder(self, **kwargs) -> BaseHrefBuilder:
+    def create_crs_response(self, resp, crs, **kwargs) -> JSONResponse:
+        """Add Content-Crs header to JSONResponse to comply with OGC API Feat part 2"""
+        crs_ext = self.get_extension("CrsExtension")
+        if crs is None:
+            crs = crs_ext.storageCrs
+        if crs in crs_ext.crs:  # If the CRS is valid
+            return JSONResponse(resp, headers={"Content-Crs": crs})
+        else:
+            return resp
+
+    def href_builder(self, **kwargs):
         """Override with HrefBuilder which adds API token to all hrefs if present"""
         request = kwargs["request"]
         base_url = str(request.base_url)
         token = request.query_params.get("token")
+        # return BaseHrefBuilder(base_url, token)
         return ApiTokenHrefBuilder(base_url, token)
-
 
     def all_collections(self, **kwargs) -> Collections:
         """Read all collections from the database."""
@@ -107,9 +117,15 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             collections = session.query(self.collection_table).all()
             serialized_collections = [
                 #self.collection_serializer.db_to_stac(collection, base_url=base_url)
-                self.collection_serializer.db_to_stac(collection, hrefbuilder=hrefbuilder)
+                self.collection_serializer.db_to_stac(
+                    collection, hrefbuilder=hrefbuilder)
                 for collection in collections
             ]
+
+            if self.extension_is_enabled("CrsExtension"):
+                for c in serialized_collections:
+                    c.update({"crs": self.get_extension("CrsExtension").crs})
+
             links = [
                 {
                     "rel": Relations.root.value,
@@ -142,9 +158,18 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
             collection = self._lookup_id(collection_id, self.collection_table, session)
-            #return self.collection_serializer.db_to_stac(collection, base_url)
-            return self.collection_serializer.db_to_stac(collection, hrefbuilder)
 
+            # return self.collection_serializer.db_to_stac(collection, base_url)
+            serialized_collection = self.collection_serializer.db_to_stac(
+                collection, hrefbuilder)
+
+            # Add the list of service supported CRS to the collection
+            if self.extension_is_enabled("CrsExtension"):
+                serialized_collection.update(
+                    {"crs": self.get_extension("CrsExtension").crs}
+                )
+
+            return serialized_collection
 
     def item_collection(
         self,
@@ -157,7 +182,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         **kwargs,
     ) -> ItemCollection:
         """Read an item collection from the database."""
-        base_url = str(kwargs["request"].base_url)
+        # base_url = str(kwargs["request"].base_url)
+        hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
             # Look up the collection first to get a 404 if it doesn't exist
             _ = self._lookup_id(collection_id, self.collection_table, session)
@@ -167,6 +193,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 .filter(self.collection_table.id == collection_id)
                 .order_by(self.item_table.datetime.desc(), self.item_table.id)
             )
+            query = query.options(self._bbox_expression())
             # Spatial query
             geom = None
             if bbox:
@@ -267,7 +294,9 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             response_features = []
             for item in page:
                 response_features.append(
-                    self.item_serializer.db_to_stac(item, base_url=base_url)
+                    # self.item_serializer.db_to_stac(item, base_url=base_url)
+                    self.item_serializer.db_to_stac(
+                        item, hrefbuilder=hrefbuilder)
                 )
 
             context_obj = None
@@ -287,16 +316,47 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
     def get_item(self, item_id: str, collection_id: str, **kwargs) -> Item:
         """Get item by id."""
-        base_url = str(kwargs["request"].base_url)
+        request = kwargs["request"]
+        req_crs = request.query_params.get("crs")
+        if req_crs and self.extension_is_enabled("CrsExtension"):
+            stac_crs = self.get_extension("CrsExtension")
+            if self.get_extension("CrsExtension").is_crs_supported(req_crs):
+                output_srid = stac_crs.epsg_from_crs(req_crs)
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="CRS provided for argument crs is invalid, valid options are: "
+                    + ",".join(self.get_extension("CrsExtension").crs),
+                )
+        else:
+            req_crs = "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+        # base_url = str(kwargs["request"].base_url)
+        hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
             db_query = session.query(self.item_table)
             db_query = db_query.filter(self.item_table.collection_id == collection_id)
             db_query = db_query.filter(self.item_table.id == item_id)
+            db_query = db_query.options(self._bbox_expression())
             item = db_query.first()
             if not item:
                 raise NotFoundError(f"{self.item_table.__name__} {item_id} not found")
             return self.item_serializer.db_to_stac(item, base_url=base_url)
+            # return self.item_serializer.db_to_stac(item, base_url=base_url)
+            resp = self.item_serializer.db_to_stac(
+                item, hrefbuilder=hrefbuilder)
 
+            if self.get_extension("CrsExtension"):
+                if (
+                    "crs" not in resp["properties"]
+                ):  # If the CRS type has not been populated to the response
+                    crs_obj = {
+                        "type": "name",
+                        "properties": {"name": f"{req_crs}"},
+                    }
+                resp["properties"]["crs"] = crs_obj
+                return self.create_crs_response(resp, req_crs)
+
+            return resp
     def get_search(
         self,
         collections: Optional[List[str]] = None,
