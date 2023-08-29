@@ -175,6 +175,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         collection_id: str,
         bbox: Optional[List[NumType]] = None,
         datetime: Optional[str] = None,
+        crs: Optional[str] = None,
         limit: int = 10,
         #token: str = None,
         pt: str = None,
@@ -292,11 +293,22 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
             response_features = []
             for item in page:
+                serialized_item = self.item_serializer.db_to_stac(
+                    item, hrefbuilder=hrefbuilder)
                 response_features.append(
                     # self.item_serializer.db_to_stac(item, base_url=base_url)
-                    self.item_serializer.db_to_stac(
-                        item, hrefbuilder=hrefbuilder)
+                    serialized_item
                 )
+                if self.extension_is_enabled("CrsExtension"):
+                    if self.get_extension("CrsExtension"):
+                        # If the CRS type has not been populated to the response
+                        if ("crs" not in serialized_item["properties"]):
+                            print(f"->DEBUG: {crs}")
+                            crs_obj = {
+                                "type": "name",
+                                "properties": {"name": f"{crs}"},
+                            }
+                            serialized_item["properties"]["crs"] = crs_obj
 
             context_obj = None
             if self.extension_is_enabled("ContextExtension"):
