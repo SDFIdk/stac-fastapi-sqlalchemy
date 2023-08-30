@@ -311,7 +311,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     if self.get_extension("CrsExtension"):
                         # If the CRS type has not been populated to the response
                         if ("crs" not in serialized_item["properties"]):
-                            print(f"->DEBUG: {crs}")
                             crs_obj = {
                                 "type": "name",
                                 "properties": {"name": f"{crs}"},
