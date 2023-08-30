@@ -228,6 +228,13 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 elif dts[1] not in ["", ".."]:
                     query = query.filter(self.item_table.datetime <= dts[1])
 
+            if crs:
+                if not self.get_extension("CrsExtension").is_crs_supported(crs):
+                    raise HTTPException(
+                        status_code=400,
+                        detail="CRS provided for argument crs is invalid, valid options are: "
+                        + ",".join(self.get_extension("CrsExtension").crs),
+                    )
             count = None
             if self.extension_is_enabled("ContextExtension"):
                 count_query = query.statement.with_only_columns(
