@@ -235,6 +235,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         detail="CRS provided for argument crs is invalid, valid options are: "
                         + ",".join(self.get_extension("CrsExtension").crs),
                     )
+                
             count = None
             if self.extension_is_enabled("ContextExtension"):
                 count_query = query.statement.with_only_columns(
@@ -317,6 +318,10 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                             }
                             serialized_item["properties"]["crs"] = crs_obj
 
+            # ItemCollection
+            if self.extension_is_enabled("CrsExtension"):
+                return self.create_crs_response(response_features, crs)
+        
             context_obj = None
             if self.extension_is_enabled("ContextExtension"):
                 context_obj = {
@@ -374,6 +379,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 return self.create_crs_response(resp, req_crs)
 
             return resp
+        
     def get_search(
         self,
         collections: Optional[List[str]] = None,
