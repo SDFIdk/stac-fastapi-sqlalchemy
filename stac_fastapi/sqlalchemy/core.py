@@ -208,7 +208,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             if geom:
                 filter_geom = ga.shape.from_shape(geom, srid=4326)
                 query = query.filter(
-                    ga.func.ST_Intersects(self.item_table.geometry, filter_geom)
+                    ga.func.ST_Intersects(self.item_table.footprint, filter_geom)
                 )
 
             # Temporal query
