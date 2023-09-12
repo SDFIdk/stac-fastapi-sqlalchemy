@@ -318,10 +318,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                                 "properties": {"name": f"{crs}"},
                             }
                             serialized_item["properties"]["crs"] = crs_obj
-
-            # ItemCollection
-            if self.extension_is_enabled("CrsExtension"):
-                return self.create_crs_response(response_features, crs)
         
             context_obj = None
             if self.extension_is_enabled("ContextExtension"):
@@ -331,12 +327,20 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     "matched": count,
                 }
 
-            return ItemCollection(
+            # The response has to be returned as a ItemCollection type
+            resp = ItemCollection(
                 type="FeatureCollection",
                 features=response_features,
                 links=links,
                 context=context_obj,
             )
+
+            # If the CRS extension is enable we return the response here with an content-crs header 
+            if self.extension_is_enabled("CrsExtension"):
+                return self.create_crs_response(resp, crs)
+
+            # If the CRS extension is disable we return the reponse here
+            return resp
 
     def get_item(self, item_id: str, collection_id: str, **kwargs) -> Item:
         """Get item by id."""
