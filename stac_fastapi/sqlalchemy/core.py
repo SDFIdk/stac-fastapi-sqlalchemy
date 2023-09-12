@@ -242,6 +242,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     [func.count()]
                 ).order_by(None)
                 count = query.session.execute(count_query).scalar()
+                
             #token = self.get_token(token) if token else token
             pagination_token = (self.from_token(pt) if pt else pt)
             #page = get_page(query, per_page=limit, page=(token or False))
