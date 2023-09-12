@@ -581,17 +581,18 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     elif dts[1] not in ["", ".."]:
                         query = query.filter(self.item_table.datetime <= dts[1])
 
+                # We don't support query parameter `query`
                 # Query fields
-                if search_request.query:
-                    for field_name, expr in search_request.query.items():
-                        field = self.item_table.get_field(field_name)
-                        for op, value in expr.items():
-                            if op == Operator.gte:
-                                query = query.filter(operator.ge(field, value))
-                            elif op == Operator.lte:
-                                query = query.filter(operator.le(field, value))
-                            else:
-                                query = query.filter(op.operator(field, value))
+                # if search_request.query:
+                #     for field_name, expr in search_request.query.items():
+                #         field = self.item_table.get_field(field_name)
+                #         for op, value in expr.items():
+                #             if op == Operator.gte:
+                #                 query = query.filter(operator.ge(field, value))
+                #             elif op == Operator.lte:
+                #                 query = query.filter(operator.le(field, value))
+                #             else:
+                #                 query = query.filter(op.operator(field, value))
 
                 if self.extension_is_enabled("ContextExtension"):
                     count_query = query.statement.with_only_columns(
