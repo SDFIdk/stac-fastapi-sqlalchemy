@@ -117,8 +117,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             collections = session.query(self.collection_table).all()
             serialized_collections = [
                 #self.collection_serializer.db_to_stac(collection, base_url=base_url)
-                self.collection_serializer.db_to_stac(
-                    collection, hrefbuilder=hrefbuilder)
+                self.collection_serializer.db_to_stac(collection, hrefbuilder=hrefbuilder)
                 for collection in collections
             ]
 
