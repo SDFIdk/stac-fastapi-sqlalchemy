@@ -66,18 +66,29 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             raise NotFoundError(f"{table.__name__} {id} not found")
         return row
     
+    def _geometry_expression(self, to_srid: int):
+        """Returns Ad Hoc SQL expression which can be applied to a "deferred expression" attribute.
+        The expression makes sure the geometry is returned in the requested SRID."""
+        if to_srid != 4326:
+            geom = ga.func.ST_Transform(self.item_table.footprint, to_srid)
+        else:
+            geom = self.item_table.footprint
 
-    def _bbox_expression(self):
+        return with_expression(
+            self.item_table.footprint,
+            geom,
+        )
+
+    def _bbox_expression(self, to_srid: int):
     #def _bbox_expression(self, to_srid: int):
         """Returns Ad Hoc SQL expression which can be applied to a "deferred expression" attribute.
         We don't have bbox as a column in the database, but we imitate with query_expression() and with_expression().
         with_expression() needs to be triggered for it to be made Ad Hoc
         The expression makes sure the BBOX is returned in the requested SRID."""
-        # if to_srid != self.storage_srid:
-        #     geom = ga.func.ST_Transform(self.item_table.footprint, to_srid)
-        # else:
-        #     geom = self.item_table.footprint
-        geom = self.item_table.footprint
+        if to_srid != 4326:
+            geom = ga.func.ST_Transform(self.item_table.footprint, to_srid)
+        else:
+            geom = self.item_table.footprint
 
         return with_expression(
             self.item_table.bbox,
@@ -193,7 +204,26 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 .filter(self.collection_table.id == collection_id)
                 .order_by(self.item_table.datetime.desc(), self.item_table.id)
             )
-            query = query.options(self._bbox_expression())
+
+            # crs has a default value
+            if crs and self.extension_is_enabled("CrsExtension"):
+                if self.get_extension("CrsExtension").is_crs_supported(crs):
+                    output_srid = self.get_extension("CrsExtension").epsg_from_crs(crs)
+                    output_crs = crs
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="CRS provided for argument crs is invalid, valid options are: "
+                        + ",".join(self.get_extension("CrsExtension").crs),
+                    )
+            else:
+                output_srid = 4326
+                output_crs = "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+
+            # Transform footprint and bbox if necessary
+            query = query.options(self._geometry_expression(output_srid))
+            query = query.options(self._bbox_expression(output_srid))
+
             # Spatial query
             geom = None
             if bbox:
@@ -226,14 +256,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 # All items before the end date
                 elif dts[1] not in ["", ".."]:
                     query = query.filter(self.item_table.datetime <= dts[1])
-
-            if crs and self.extension_is_enabled("CrsExtension"):
-                if not self.get_extension("CrsExtension").is_crs_supported(crs):
-                    raise HTTPException(
-                        status_code=400,
-                        detail="CRS provided for argument crs is invalid, valid options are: "
-                        + ",".join(self.get_extension("CrsExtension").crs),
-                    )
                 
             count = None
             if self.extension_is_enabled("ContextExtension"):
