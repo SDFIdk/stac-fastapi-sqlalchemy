@@ -209,7 +209,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             if crs and self.extension_is_enabled("CrsExtension"):
                 if self.get_extension("CrsExtension").is_crs_supported(crs):
                     output_srid = self.get_extension("CrsExtension").epsg_from_crs(crs)
-                    output_crs = crs
                 else:
                     raise HTTPException(
                         status_code=400,
@@ -218,7 +217,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     )
             else:
                 output_srid = 4326
-                output_crs = "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
             # Transform footprint and bbox if necessary
             query = query.options(self._geometry_expression(output_srid))
@@ -370,7 +368,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         if crs and self.extension_is_enabled("CrsExtension"):
             if self.get_extension("CrsExtension").is_crs_supported(crs):
                 output_srid = self.get_extension("CrsExtension").epsg_from_crs(crs)
-                output_crs = crs
             else:
                 raise HTTPException(
                     status_code=400,
@@ -379,7 +376,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 )
         else:
             output_srid = 4326
-            output_crs = "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
         # base_url = str(kwargs["request"].base_url)
         hrefbuilder = self.href_builder(**kwargs)
@@ -403,7 +399,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     ):  # If the CRS type has not been populated to the response
                         crs_obj = {
                             "type": "name",
-                            "properties": {"name": f"{output_crs}"},
+                            "properties": {"name": f"{crs}"},
                         }
                     resp["properties"]["crs"] = crs_obj
                     return self.create_crs_response(resp, crs)
