@@ -363,14 +363,14 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             # If the CRS extension is disable we return the reponse here
             return resp
 
-    def get_item(self, item_id: str, collection_id: str, **kwargs) -> Item:
+    def get_item(self, item_id: str, collection_id: str, crs: Optional[str] = None, **kwargs) -> Item:
         """Get item by id."""
-        request = kwargs["request"]
-        req_crs = request.query_params.get("crs")
-        if req_crs and self.extension_is_enabled("CrsExtension"):
-            stac_crs = self.get_extension("CrsExtension")
-            if self.get_extension("CrsExtension").is_crs_supported(req_crs):
-                output_srid = stac_crs.epsg_from_crs(req_crs)
+        
+        # crs has a default value
+        if crs and self.extension_is_enabled("CrsExtension"):
+            if self.get_extension("CrsExtension").is_crs_supported(crs):
+                output_srid = self.get_extension("CrsExtension").epsg_from_crs(crs)
+                output_crs = crs
             else:
                 raise HTTPException(
                     status_code=400,
@@ -378,14 +378,17 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     + ",".join(self.get_extension("CrsExtension").crs),
                 )
         else:
-            req_crs = "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+            output_srid = 4326
+            output_crs = "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+
         # base_url = str(kwargs["request"].base_url)
         hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
             db_query = session.query(self.item_table)
             db_query = db_query.filter(self.item_table.collection_id == collection_id)
             db_query = db_query.filter(self.item_table.id == item_id)
-            db_query = db_query.options(self._bbox_expression())
+            db_query = db_query.options(self._geometry_expression(output_srid))
+            db_query = db_query.options(self._bbox_expression(output_srid))
             item = db_query.first()
             if not item:
                 raise NotFoundError(f"{self.item_table.__name__} {item_id} not found")
@@ -393,16 +396,17 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             resp = self.item_serializer.db_to_stac(
                 item, hrefbuilder=hrefbuilder)
 
-            if self.get_extension("CrsExtension"):
-                if (
-                    "crs" not in resp["properties"]
-                ):  # If the CRS type has not been populated to the response
-                    crs_obj = {
-                        "type": "name",
-                        "properties": {"name": f"{req_crs}"},
-                    }
-                resp["properties"]["crs"] = crs_obj
-                return self.create_crs_response(resp, req_crs)
+            if self.extension_is_enabled("CrsExtension"):
+                if self.get_extension("CrsExtension"):
+                    if (
+                        "crs" not in resp["properties"]
+                    ):  # If the CRS type has not been populated to the response
+                        crs_obj = {
+                            "type": "name",
+                            "properties": {"name": f"{output_crs}"},
+                        }
+                    resp["properties"]["crs"] = crs_obj
+                    return self.create_crs_response(resp, crs)
 
             return resp
         
