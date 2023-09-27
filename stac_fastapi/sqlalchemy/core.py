@@ -413,7 +413,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         bbox: Optional[List[NumType]] = None,
         datetime: Optional[Union[str, datetime]] = None,
         limit: Optional[int] = 10,
-        query: Optional[str] = None,
+        #query: Optional[str] = None,
         #token: Optional[str] = None,
         pt: Optional[str] = None,
         fields: Optional[List[str]] = None,
@@ -430,7 +430,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             "limit": limit,
             #"token": token,
             "pt": pt,
-            "query": json.loads(unquote_plus(query)) if query else query,
+            #"query": json.loads(unquote_plus(query)) if query else query,
         }
 
         if datetime:
