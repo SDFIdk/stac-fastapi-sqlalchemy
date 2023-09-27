@@ -419,6 +419,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         fields: Optional[List[str]] = None,
         sortby: Optional[str] = None,
         intersects: Optional[str] = None,
+        crs: Optional[str] = None,
         **kwargs,
     ) -> ItemCollection:
         """GET search catalog."""
@@ -431,6 +432,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             #"token": token,
             "pt": pt,
             #"query": json.loads(unquote_plus(query)) if query else query,
+            "crs": crs
         }
 
         if datetime:
@@ -469,7 +471,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         except ValidationError:
             raise HTTPException(status_code=400, detail="Invalid parameters provided")
         resp = self.post_search(search_request, request=kwargs["request"])
-
+        
         # Pagination
         page_links = []
         for link in resp["links"]:
@@ -504,8 +506,23 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             )
             query = session.query(self.item_table)
 
-            #query = query.options(self._bbox_expression(output_srid))
-            query = query.options(self._bbox_expression())
+            # crs has a default value
+            if search_request.crs and self.extension_is_enabled("CrsExtension"):
+                if self.get_extension("CrsExtension").is_crs_supported(search_request.crs):
+                    output_srid = self.get_extension("CrsExtension").epsg_from_crs(search_request.crs)
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="CRS provided for argument crs is invalid, valid options are: "
+                        + ",".join(self.get_extension("CrsExtension").crs),
+                    )
+            else:
+                output_srid = 4326
+
+            # Transform footprint and bbox if necessary
+            query = query.options(self._geometry_expression(output_srid))
+            query = query.options(self._bbox_expression(output_srid))
+            #query = query.options(self._bbox_expression())
 
             # Filter by collection
             count = None
