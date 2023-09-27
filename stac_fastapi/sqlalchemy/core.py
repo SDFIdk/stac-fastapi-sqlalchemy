@@ -347,6 +347,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 }
 
             # The response has to be returned as a ItemCollection type
+            # return ItemCollection(
             resp = ItemCollection(
                 type="FeatureCollection",
                 features=response_features,
