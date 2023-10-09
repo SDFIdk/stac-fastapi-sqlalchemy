@@ -185,6 +185,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         self,
         collection_id: str,
         bbox: Optional[List[NumType]] = None,
+        bbox_crs: str = None,
         datetime: Optional[str] = None,
         crs: Optional[str] = None,
         limit: int = 10,
@@ -217,6 +218,19 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     )
             else:
                 output_srid = 4326
+            
+            if bbox_crs and self.extension_is_enabled("CrsExtension"):
+                # TODO move into the validator, once it's figured out how to reference the CRS extension
+                if self.get_extension("CrsExtension").is_crs_supported(bbox_crs):
+                    bbox_srid = self.get_extension("CrsExtension").epsg_from_crs(bbox_crs)
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="CRS provided for argument bbox_crs is invalid, valid options are: "
+                        + ",".join(self.get_extension("CrsExtension").crs),
+                    )
+            else:
+                bbox_srid = 4326
 
             # Transform footprint and bbox if necessary
             query = query.options(self._geometry_expression(output_srid))
