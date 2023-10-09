@@ -55,6 +55,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
     collection_serializer: Type[serializers.Serializer] = attr.ib(
         default=serializers.CollectionSerializer
     )
+    storage_srid: int = attr.ib(default=4326)
 
     @staticmethod
     def _lookup_id(
@@ -69,7 +70,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
     def _geometry_expression(self, to_srid: int):
         """Returns Ad Hoc SQL expression which can be applied to a "deferred expression" attribute.
         The expression makes sure the geometry is returned in the requested SRID."""
-        if to_srid != 4326:
+        if to_srid != self.storage_srid:
             geom = ga.func.ST_Transform(self.item_table.footprint, to_srid)
         else:
             geom = self.item_table.footprint
@@ -85,7 +86,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         We don't have bbox as a column in the database, but we imitate with query_expression() and with_expression().
         with_expression() needs to be triggered for it to be made Ad Hoc
         The expression makes sure the BBOX is returned in the requested SRID."""
-        if to_srid != 4326:
+        if to_srid != self.storage_srid:
             geom = ga.func.ST_Transform(self.item_table.footprint, to_srid)
         else:
             geom = self.item_table.footprint
@@ -203,7 +204,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 session.query(self.item_table)
                 .join(self.collection_table)
                 .filter(self.collection_table.id == collection_id)
-                .order_by(self.item_table.datetime.desc(), self.item_table.id)
+                #.order_by(self.item_table.datetime.desc(), self.item_table.id)
             )
 
             # crs has a default value
@@ -247,10 +248,37 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     bbox_2d = [bbox[0], bbox[1], bbox[3], bbox[4]]
                     geom = ShapelyPolygon.from_bounds(*bbox_2d)
             if geom:
-                filter_geom = ga.shape.from_shape(geom, srid=4326)
-                query = query.filter(
-                    ga.func.ST_Intersects(self.item_table.footprint, filter_geom)
-                )
+                #filter_geom = ga.shape.from_shape(geom, srid=4326)
+                filter_geom = ga.shape.from_shape(geom, srid=bbox_srid)
+                # query = query.filter(
+                #     ga.func.ST_Intersects(self.item_table.footprint, filter_geom)
+                # )
+ 
+                if bbox_srid == self.storage_srid:
+                    query = query.filter(
+                        ga.func.ST_Intersects(
+                            self.item_table.footprint, filter_geom
+                        )
+                    )
+                else:
+                # Need to transform the input bbox value srid to storage_srid     
+                    query = query.filter(
+                        ga.func.ST_Intersects(
+                            ga.func.ST_Transform(filter_geom, self.storage_srid),
+                            self.item_table.footprint,
+                        ),
+                    )
+
+                # Finds and sorts by the input geometry centroid and calculates the distance to the footprint centroid.
+                distance = ga.func.ST_Distance(
+                    ga.func.ST_Centroid(
+                            ga.func.ST_Envelope(self.item_table.footprint)
+                        ),
+                    # Footprint in the database are in srid 4326
+                    ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid),self.storage_srid),self.storage_srid)
+                    )
+
+                query = query.order_by(distance)
 
             # Temporal query
             if datetime:
@@ -268,7 +296,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 # All items before the end date
                 elif dts[1] not in ["", ".."]:
                     query = query.filter(self.item_table.datetime <= dts[1])
-                
+
             count = None
             if self.extension_is_enabled("ContextExtension"):
                 count_query = query.statement.with_only_columns(
