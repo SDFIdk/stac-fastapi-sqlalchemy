@@ -297,6 +297,9 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 elif dts[1] not in ["", ".."]:
                     query = query.filter(self.item_table.datetime <= dts[1])
 
+            # Default sort is date
+            query = query.order_by(self.item_table.datetime.desc(), self.item_table.id)
+
             count = None
             if self.extension_is_enabled("ContextExtension"):
                 count_query = query.statement.with_only_columns(
