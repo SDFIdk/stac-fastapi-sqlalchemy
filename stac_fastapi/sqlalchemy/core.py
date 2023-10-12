@@ -218,7 +218,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         + ",".join(self.get_extension("CrsExtension").crs),
                     )
             else:
-                output_srid = 4326
+                output_srid = self.storage_srid
             
             if bbox_crs and self.extension_is_enabled("CrsExtension"):
                 # TODO move into the validator, once it's figured out how to reference the CRS extension
@@ -231,7 +231,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         + ",".join(self.get_extension("CrsExtension").crs),
                     )
             else:
-                bbox_srid = 4326
+                bbox_srid = self.storage_srid
 
             # Transform footprint and bbox if necessary
             query = query.options(self._geometry_expression(output_srid))
@@ -418,7 +418,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     + ",".join(self.get_extension("CrsExtension").crs),
                 )
         else:
-            output_srid = 4326
+            output_srid = self.storage_srid
 
         # base_url = str(kwargs["request"].base_url)
         hrefbuilder = self.href_builder(**kwargs)
@@ -559,7 +559,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         + ",".join(self.get_extension("CrsExtension").crs),
                     )
             else:
-                output_srid = 4326
+                output_srid = self.storage_srid
 
             # Transform footprint and bbox if necessary
             query = query.options(self._geometry_expression(output_srid))
@@ -639,7 +639,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         geom = ShapelyPolygon.from_bounds(*bbox_2d)
 
                 if geom:
-                    filter_geom = ga.shape.from_shape(geom, srid=4326)
+                    #filter_geom = ga.shape.from_shape(geom, srid=4326)
+                    filter_geom = ga.shape.from_shape(geom, srid=self.storage_srid)
                     query = query.filter(
                         ga.func.ST_Intersects(self.item_table.geometry, filter_geom)
                     )
