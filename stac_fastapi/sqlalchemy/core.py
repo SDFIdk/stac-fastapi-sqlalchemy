@@ -344,13 +344,21 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     "href": str(kwargs["request"].base_url),
                 },
             ]
+
+            # Get query params
+            query_params = dict(kwargs["request"].query_params)
+
+            # Avoid multiple pt query params on the same endpoint in response
+            if pt is not None:
+                del query_params["pt"]
+
             if page.next:
                 links.append(
                     {
                         "rel": Relations.next.value,
                         "type": "application/geo+json",
-                        #"href": f"{kwargs['request'].base_url}collections/{collection_id}/items?token={page.next}&limit={limit}",
-                        "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?pt={page.next}&limit={limit}",
+                        # "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?token={page.next}&limit={limit}",
+                        "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?{urlencode(query_params)}&pt={page.next}",
                         "method": "GET",
                     }
                 )
@@ -359,8 +367,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     {
                         "rel": Relations.previous.value,
                         "type": "application/geo+json",
-                        #"href": f"{kwargs['request'].base_url}collections/{collection_id}/items?token={page.previous}&limit={limit}",
-                        "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?pt={page.previous}&limit={limit}",
+                        # "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?token={page.previous}&limit={limit}",
+                        "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?{urlencode(query_params)}&pt={page.previous}",
                         "method": "GET",
                     }
                 )
