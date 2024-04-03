@@ -19,6 +19,7 @@ install_requires = [
     "psycopg2-binary",
     "alembic",
     "fastapi-utils",
+    "pygeofilter==0.2.*",
 ]
 
 extra_reqs = {

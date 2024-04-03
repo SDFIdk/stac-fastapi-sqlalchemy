@@ -9,7 +9,8 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import query_expression
 
-from stac_fastapi.sqlalchemy.extensions.query import Queryables, QueryableTypes
+from stac_fastapi.sqlalchemy.types.filter import Queryables
+from stac_fastapi.sqlalchemy.extensions.filter import QueryableTypes
 
 BaseModel = declarative_base()
 
@@ -128,11 +129,11 @@ class Item(BaseModel):  # type:ignore
     def get_field(cls, field_name):
         """Get a model field."""
         try:
-            return getattr(cls, field_name)
+            return getattr(cls, Queryables.get_queryable(field_name).name)
         except AttributeError:
             # Use a JSONB field
             return cls.properties[(field_name)].cast(
-                getattr(QueryableTypes, Queryables(field_name).name)
+                getattr(QueryableTypes, Queryables.get_queryable(field_name).name)
             )
 
 

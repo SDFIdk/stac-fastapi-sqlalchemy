@@ -27,6 +27,9 @@ from stac_fastapi.types.search import BaseSearchPostRequest
 from stac_fastapi.types.stac import Collection, Collections, Item, ItemCollection
 from stac_pydantic.links import Relations
 from stac_pydantic.shared import MimeTypes
+from pygeofilter.backends.sqlalchemy import to_filter
+from pygeofilter.parsers.cql_json import parse
+import pygeofilter
 
 from stac_fastapi.sqlalchemy import serializers
 from stac_fastapi.sqlalchemy.extensions.filter import QueryableTypes
@@ -41,6 +44,32 @@ logger = logging.getLogger(__name__)
 
 NumType = Union[float, int]
 
+def monkeypatch_parse_geometry(geom):
+    wkt = shape(geom).wkt
+    crs = geom["crs"] if "crs" in geom.keys() else 4326
+    if crs == 4326:
+        return func.ST_GeomFromText(wkt, 4326)
+    else:
+        return func.ST_Transform(func.ST_GeomFromText(wkt, crs), 4326)
+    
+def get_geometry_filter(filter):
+    """
+    Get geometry from filter
+    Returns None if no geometry was found
+    """
+    if hasattr(filter, 'geometry'):
+        return filter
+
+    lhs, rhs = None, None
+    if hasattr(filter, 'lhs'):
+        lhs = get_geometry_filter(filter.lhs)
+    if hasattr(filter, 'rhs'):
+        rhs = get_geometry_filter(filter.rhs)
+
+    if lhs is not None:
+        return lhs
+
+    return rhs
 
 @attr.s
 class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
@@ -56,6 +85,10 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         default=serializers.CollectionSerializer
     )
     storage_srid: int = attr.ib(default=4326)
+
+    FIELD_MAPPING = {}
+    for q in Queryables.get_all_queryables():
+        FIELD_MAPPING[q] = item_table._default.get_field(q)
 
     @staticmethod
     def _lookup_id(
@@ -190,6 +223,9 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         datetime: Optional[str] = None,
         crs: Optional[str] = None,
         limit: int = 10,
+        filter: Optional[str] = None,
+        filter_lang: Optional[str] = None,
+        filter_crs: Optional[str] = None,
         #token: str = None,
         pt: str = None,
         **kwargs,
@@ -297,6 +333,29 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 elif dts[1] not in ["", ".."]:
                     query = query.filter(self.item_table.datetime <= dts[1])
 
+            if filter:
+                # monkey patch parse_geometry from pygeofilter
+                pygeofilter.backends.sqlalchemy.filters.parse_geometry = monkeypatch_parse_geometry
+                ast = parse(filter)
+                sa_expr = to_filter(ast, self.FIELD_MAPPING)
+                
+                geometry = get_geometry_filter(filter)
+                if geometry is not None:
+                    geom = shape(geometry)
+                if geom:
+                    # Finds and sorts by the input geometry centroid and calculates the distance to the footprint centroid.
+                    distance = ga.func.ST_Distance(
+                        ga.func.ST_Centroid(
+                                ga.func.ST_Envelope(self.item_table.footprint)
+                            ),
+                        # Footprint in the database are in srid 4326
+                        ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid), filter_crs),self.storage_srid)
+                        )
+
+                    query = query.filter(sa_expr).order_by(distance)
+                else:
+                    query = query.filter(sa_expr)
+
             # Default sort is date
             query = query.order_by(self.item_table.datetime.desc(), self.item_table.id)
 
@@ -347,6 +406,11 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
             # Get query params
             query_params = dict(kwargs["request"].query_params)
+            # parse and dump json to prettify link in case of "ugly" but valid input formatting
+            if "filter" in query_params:
+                    query_params["filter"] = json.dumps(
+                        json.loads(query_params["filter"])
+                    )  
 
             # Avoid multiple pt query params on the same endpoint in response
             if pt is not None:
@@ -470,6 +534,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         #token: Optional[str] = None,
         pt: Optional[str] = None,
         fields: Optional[List[str]] = None,
+        filter: Optional[str] = None,
         sortby: Optional[str] = None,
         intersects: Optional[str] = None,
         crs: Optional[str] = None,
@@ -494,6 +559,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         if intersects:
             base_args["intersects"] = json.loads(unquote_plus(intersects))
 
+        # TODO: Missing implementation from old code
         if sortby:
             # https://github.com/radiantearth/stac-spec/tree/master/api-spec/extensions/sort#http-get-or-post-form
             sort_param = []
