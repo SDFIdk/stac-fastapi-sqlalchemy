@@ -256,8 +256,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             else:
                 output_srid = self.storage_srid
             
+            # bbox_crs has a default value
             if bbox_crs and self.extension_is_enabled("CrsExtension"):
-                # TODO move into the validator, once it's figured out how to reference the CRS extension
                 if self.get_extension("CrsExtension").is_crs_supported(bbox_crs):
                     bbox_srid = self.get_extension("CrsExtension").epsg_from_crs(bbox_crs)
                 else:
@@ -268,6 +268,19 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     )
             else:
                 bbox_srid = self.storage_srid
+
+            # filter_crs has a default value
+            if filter_crs and self.extension_is_enabled("CrsExtension"):
+                if self.get_extension("CrsExtension").is_crs_supported(filter_crs):
+                    filter_crs = self.get_extension("CrsExtension").epsg_from_crs(filter_crs)
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="CRS provided for argument filter_crs is invalid, valid options are: "
+                        + ",".join(self.get_extension("CrsExtension").crs),
+                    )
+            else:
+                filter_crs = self.storage_srid
 
             # Transform footprint and bbox if necessary
             query = query.options(self._geometry_expression(output_srid))
