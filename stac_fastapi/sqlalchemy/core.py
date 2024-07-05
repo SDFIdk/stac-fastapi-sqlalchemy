@@ -650,6 +650,19 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     )
             else:
                 output_srid = self.storage_srid
+            
+            # bbox_crs has a default value
+            if search_request.bbox_crs and self.extension_is_enabled("CrsExtension"):
+                if self.get_extension("CrsExtension").is_crs_supported(search_request.bbox_crs):
+                    bbox_srid = self.get_extension("CrsExtension").epsg_from_crs(search_request.bbox_crs)
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="CRS provided for argument bbox_crs is invalid, valid options are: "
+                        + ",".join(self.get_extension("CrsExtension").crs),
+                    )
+            else:
+                bbox_srid = self.storage_srid
 
             # Transform footprint and bbox if necessary
             query = query.options(self._geometry_expression(output_srid))
@@ -730,10 +743,36 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
                 if geom:
                     #filter_geom = ga.shape.from_shape(geom, srid=4326)
-                    filter_geom = ga.shape.from_shape(geom, srid=self.storage_srid)
-                    query = query.filter(
-                        ga.func.ST_Intersects(self.item_table.geometry, filter_geom)
-                    )
+                    filter_geom = ga.shape.from_shape(geom, srid=bbox_srid)
+                    # query = query.filter(
+                    #     ga.func.ST_Intersects(self.item_table.footprint, filter_geom)
+                    # )
+    
+                    if bbox_srid == self.storage_srid:
+                        query = query.filter(
+                            ga.func.ST_Intersects(
+                                self.item_table.footprint, filter_geom
+                            )
+                        )
+                    else:
+                    # Need to transform the input bbox value srid to storage_srid     
+                        query = query.filter(
+                            ga.func.ST_Intersects(
+                                ga.func.ST_Transform(filter_geom, self.storage_srid),
+                                self.item_table.footprint,
+                            ),
+                        )
+
+                    # Finds and sorts by the input geometry centroid and calculates the distance to the footprint centroid.
+                    distance = ga.func.ST_Distance(
+                        ga.func.ST_Centroid(
+                                ga.func.ST_Envelope(self.item_table.footprint)
+                            ),
+                        # Footprint in the database are in srid 4326
+                        ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid),self.storage_srid),self.storage_srid)
+                        )
+
+                    query = query.order_by(distance)
 
                 # Temporal query
                 if search_request.datetime:
