@@ -886,6 +886,17 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     for feat in response_features
                 ]
 
+        # rewritten as a list-comprehension to speedup creation of the list
+        # Enumerations should be faster than looping and appending
+        if self.extension_is_enabled("CrsExtension"):
+            crs_obj = {
+                "type": "name",
+                "properties": {"name": f"{search_request.crs}"},
+            }
+
+            for feat in response_features:
+                feat["crs"] = crs_obj
+
         context_obj = None
         if self.extension_is_enabled("ContextExtension"):
             context_obj = {
