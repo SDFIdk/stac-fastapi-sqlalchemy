@@ -745,17 +745,19 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                                 self.item_table.footprint,
                             ),
                         )
+                    
+                    # if sortby is None, items get sorted by shortest distance to geom
+                    if search_request.sortby is None:
+                        # Finds and sorts by the input geometry centroid and calculates the distance to the footprint centroid.
+                        distance = ga.func.ST_Distance(
+                            ga.func.ST_Centroid(
+                                    ga.func.ST_Envelope(self.item_table.footprint)
+                                ),
+                            # Footprint in the database are in srid 4326
+                            ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid),self.storage_srid),self.storage_srid)
+                            )
 
-                    # Finds and sorts by the input geometry centroid and calculates the distance to the footprint centroid.
-                    distance = ga.func.ST_Distance(
-                        ga.func.ST_Centroid(
-                                ga.func.ST_Envelope(self.item_table.footprint)
-                            ),
-                        # Footprint in the database are in srid 4326
-                        ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid),self.storage_srid),self.storage_srid)
-                        )
-
-                    query = query.order_by(distance)
+                        query = query.order_by(distance)
 
                 # Sort
                 if search_request.sortby:
