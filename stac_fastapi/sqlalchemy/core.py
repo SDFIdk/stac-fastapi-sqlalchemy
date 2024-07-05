@@ -681,23 +681,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     )
                 )
 
-            # Sort
-            if search_request.sortby:
-                sort_fields = [
-                    getattr(
-                        self.item_table.get_field(sort.field),
-                        sort.direction.value,
-                    )()
-                    for sort in search_request.sortby
-                ]
-                sort_fields.append(self.item_table.id)
-                query = query.order_by(*sort_fields)
-            else:
-                # Default sort is date
-                query = query.order_by(
-                    self.item_table.datetime.desc(), self.item_table.id
-                )
-
             # Ignore other parameters if ID is present
             if search_request.ids:
                 id_filter = sa.or_(
@@ -773,6 +756,23 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         )
 
                     query = query.order_by(distance)
+
+                # Sort
+                if search_request.sortby:
+                    sort_fields = [
+                        getattr(
+                            self.item_table.get_field(sort.field),
+                            sort.direction.value,
+                        )()
+                        for sort in search_request.sortby
+                    ]
+                    sort_fields.append(self.item_table.id)
+                    query = query.order_by(*sort_fields)
+                else:
+                    # Default sort is date
+                    query = query.order_by(
+                        self.item_table.datetime.desc(), self.item_table.id
+                    )
 
                 # Temporal query
                 if search_request.datetime:
