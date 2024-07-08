@@ -362,7 +362,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                                 ga.func.ST_Envelope(self.item_table.footprint)
                             ),
                         # Footprint in the database are in srid 4326
-                        ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid), filter_srid),self.storage_srid)
+                        ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid), filter_srid), self.storage_srid)
                         )
 
                     query = query.filter(sa_expr).order_by(distance)
