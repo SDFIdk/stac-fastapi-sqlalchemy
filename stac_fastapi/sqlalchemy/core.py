@@ -272,7 +272,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             # filter_crs has a default value
             if filter_crs and self.extension_is_enabled("CrsExtension"):
                 if self.get_extension("CrsExtension").is_crs_supported(filter_crs):
-                    filter_crs = self.get_extension("CrsExtension").epsg_from_crs(filter_crs)
+                    filter_srid = self.get_extension("CrsExtension").epsg_from_crs(filter_crs)
                 else:
                     raise HTTPException(
                         status_code=400,
@@ -280,7 +280,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         + ",".join(self.get_extension("CrsExtension").crs),
                     )
             else:
-                filter_crs = self.storage_srid
+                filter_srid = self.storage_srid
 
             # Transform footprint and bbox if necessary
             query = query.options(self._geometry_expression(output_srid))
@@ -362,7 +362,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                                 ga.func.ST_Envelope(self.item_table.footprint)
                             ),
                         # Footprint in the database are in srid 4326
-                        ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid), filter_crs),self.storage_srid)
+                        ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid), filter_srid),self.storage_srid)
                         )
 
                     query = query.filter(sa_expr).order_by(distance)
