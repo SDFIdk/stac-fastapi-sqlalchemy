@@ -664,6 +664,19 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             else:
                 bbox_srid = self.storage_srid
 
+            # filter_crs has a default value
+            if search_request.filter_crs and self.extension_is_enabled("CrsExtension"):
+                if self.get_extension("CrsExtension").is_crs_supported(search_request.filter_crs):
+                    filter_srid = self.get_extension("CrsExtension").epsg_from_crs(search_request.filter_crs)
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="CRS provided for argument filter_crs is invalid, valid options are: "
+                        + ",".join(self.get_extension("CrsExtension").crs),
+                    )
+            else:
+                filter_srid = self.storage_srid
+
             # Transform footprint and bbox if necessary
             query = query.options(self._geometry_expression(output_srid))
             query = query.options(self._bbox_expression(output_srid))
@@ -758,6 +771,29 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                             )
 
                         query = query.order_by(distance)
+                
+                if search_request.filter:
+                    # monkey patch parse_geometry from pygeofilter
+                    pygeofilter.backends.sqlalchemy.filters.parse_geometry = monkeypatch_parse_geometry
+                    ast = parse(search_request.filter)
+                    sa_expr = to_filter(ast, self.FIELD_MAPPING)
+                    
+                    geometry = get_geometry_filter(ast)
+                    if geometry is not None:
+                        geom = shape(geometry)
+                    if geom:
+                        # Finds and sorts by the input geometry centroid and calculates the distance to the footprint centroid.
+                        distance = ga.func.ST_Distance(
+                            ga.func.ST_Centroid(
+                                    ga.func.ST_Envelope(self.item_table.footprint)
+                                ),
+                            # Footprint in the database are in srid 4326
+                            ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid), filter_srid), self.storage_srid)
+                            )
+
+                        query = query.filter(sa_expr).order_by(distance)
+                    else:
+                        query = query.filter(sa_expr)
 
                 # Sort
                 if search_request.sortby:
