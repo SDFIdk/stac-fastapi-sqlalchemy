@@ -314,7 +314,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     query = query.filter(
                         ga.func.ST_Intersects(
                             ga.func.ST_Transform(filter_geom, self.storage_srid),
-                            self.item_table.footprint,
+                            self.item_table.footprint
                         ),
                     )
 
@@ -742,7 +742,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         query = query.filter(
                             ga.func.ST_Intersects(
                                 ga.func.ST_Transform(filter_geom, self.storage_srid),
-                                self.item_table.footprint,
+                                self.item_table.footprint
                             ),
                         )
                     
