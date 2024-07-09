@@ -28,8 +28,7 @@ from stac_fastapi.types.stac import Collection, Collections, Item, ItemCollectio
 from stac_pydantic.links import Relations
 from stac_pydantic.shared import MimeTypes
 from pygeofilter.backends.sqlalchemy import to_filter
-from pygeofilter.parsers.cql_json import parse
-import pygeofilter
+import pygeofilter.parsers.cql_json
 
 from stac_fastapi.sqlalchemy import serializers
 from stac_fastapi.sqlalchemy.extensions.filter import QueryableTypes
@@ -52,6 +51,34 @@ def monkeypatch_parse_geometry(geom):
     else:
         return func.ST_Transform(func.ST_GeomFromText(wkt, crs), 4326)
     
+def add_filter_crs(data, crs):
+    """Add filter-crs to geometry objects in filter
+
+    Args:
+        data: The data to recursively traverse.
+
+    Returns:
+        None.
+    """
+
+    if isinstance(data, list):
+        for val in data:
+            add_filter_crs(val, crs)
+    elif isinstance(data, dict):
+        if data.get("type") in (
+            "Polygon",
+            "LineString",
+            "Point",
+            "MultiPolygon",
+            "MultiLineString",
+            "MultiPoint",
+            "GeometryCollection",
+        ):
+            data["crs"] = crs
+        else:
+            for key, value in data.items():
+                add_filter_crs(value, crs)
+    
 def get_geometry_filter(filter):
     """
     Get geometry from filter
@@ -71,6 +98,95 @@ def get_geometry_filter(filter):
 
     return rhs
 
+def inOrderFieldCollect_rec(expr) -> list:
+    """Collect all properties from the given expression
+
+    Args:
+        expr: The abstract syntax tree to traverse.
+
+    Returns:
+        A list of properties.
+    """
+
+    res = []
+    if expr:
+        if type(expr) == pygeofilter.ast.Attribute:
+            res.append(expr.name)
+            return res
+        if type(expr) == pygeofilter.ast.Not:
+            res = inOrderFieldCollect_rec(expr.sub_node)
+        if hasattr(expr, "lhs"):
+            res = inOrderFieldCollect_rec(expr.lhs)
+        if hasattr(expr, "rhs"):
+            res = res + inOrderFieldCollect_rec(expr.rhs)
+    return res
+
+def validate_filter_fields(expr, valid_fields):
+    """Validate fields in filter expression
+
+    Args:
+        expr: The abstract syntax tree to traverse.
+        valid_fields: A list of valid fields to check against
+
+    Returns:
+        None.
+    """
+
+    res = list(set(inOrderFieldCollect_rec(expr)))
+    for field_name in res:
+        if field_name not in valid_fields:
+            raise ValueError(f"Cannot search on field: {field_name}")
+    return res
+
+def inOrderOpsCollect_rec(expr, pgf_ops) -> list:
+    """Collect all operations from the given expression
+
+    Args:
+        expr: The abstract syntax tree to traverse.
+
+    Returns:
+        A list of operations.
+    """
+
+    res = []
+    if expr:
+        if type(expr) in pgf_ops.values():
+            res.append(expr.op.name.lower())
+        if type(expr) == pygeofilter.ast.Not:
+            res = res + inOrderOpsCollect_rec(expr.sub_node, pgf_ops)
+        if hasattr(expr, "lhs"):
+            res = res + inOrderOpsCollect_rec(expr.lhs, pgf_ops)
+        if hasattr(expr, "rhs"):
+            res = res + inOrderOpsCollect_rec(expr.rhs, pgf_ops)
+    return res
+
+def validate_filter_ops(expr, valid_ops):
+    """Validate oeprations in filter expression
+
+    Args:
+        expr: The abstract syntax tree to traverse.
+        valid_ops: A list of valid ops to check against
+
+    Returns:
+        None.
+    """
+
+    pgf_ops = {
+        **pygeofilter.parsers.cql_json.parser.COMPARISON_MAP,
+        **pygeofilter.parsers.cql_json.parser.SPATIAL_PREDICATES_MAP,
+        **pygeofilter.parsers.cql_json.parser.TEMPORAL_PREDICATES_MAP,
+        **pygeofilter.parsers.cql_json.parser.ARRAY_PREDICATES_MAP,
+        **pygeofilter.parsers.cql_json.parser.ARITHMETIC_MAP,
+    }
+    res = list(set(inOrderOpsCollect_rec(expr, pgf_ops)))
+    for op in res:
+        if op == "ge":
+            op = "gte"  # because of inconsistent namings in pygeofilter - uses op names 'ge', 'le' in ast but 'gte', 'lte' in their cql-json parser
+        if op == "le":
+            op = "lte"
+        if op not in valid_ops:
+            raise ValueError(f"Unsupported operation: {expr}")
+        
 @attr.s
 class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
     """Client for core endpoints defined by stac."""
@@ -349,7 +465,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             if filter:
                 # monkey patch parse_geometry from pygeofilter
                 pygeofilter.backends.sqlalchemy.filters.parse_geometry = monkeypatch_parse_geometry
-                ast = parse(filter)
+                ast = pygeofilter.parsers.cql_json.parse(filter)
                 sa_expr = to_filter(ast, self.FIELD_MAPPING)
                 
                 geometry = get_geometry_filter(filter)
@@ -773,9 +889,56 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         query = query.order_by(distance)
                 
                 if search_request.filter:
+                    # add filter-crs to filter geomtery
+                    add_filter_crs(search_request.filter, filter_srid)
+
                     # monkey patch parse_geometry from pygeofilter
                     pygeofilter.backends.sqlalchemy.filters.parse_geometry = monkeypatch_parse_geometry
-                    ast = parse(search_request.filter)
+
+                    try: 
+                        ast = pygeofilter.parsers.cql_json.parse(search_request.filter)
+                    except Exception as e: 
+                        raise HTTPException(
+                            status_code=400,
+                            detail="The input cql-json could not be parsed: " + str(e)
+                            )
+                    if ast is None:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="The input cql-json could not be parsed" 
+                        )
+                    
+                    if search_request.collections:
+                        (base_queryables, collection_queryables,) = Queryables.get_queryable_properties_intersection(search_request.collections)
+                        valid_fields = base_queryables + collection_queryables
+                    else:
+                        (base_queryables,collection_queryables,) = Queryables.get_queryable_properties_intersection()
+                        valid_fields = base_queryables + collection_queryables
+
+                    # full list of operations supported in pygeofiler
+                    valid_operations = {
+                        **pygeofilter.parsers.cql_json.parser.COMPARISON_MAP,
+                        **pygeofilter.parsers.cql_json.parser.SPATIAL_PREDICATES_MAP,
+                        **pygeofilter.parsers.cql_json.parser.TEMPORAL_PREDICATES_MAP,
+                        # **pygeofilter.parsers.cql_json.parser.ARRAY_PREDICATES_MAP,
+                        **pygeofilter.parsers.cql_json.parser.ARITHMETIC_MAP,
+                    }
+
+                    try:
+                        validate_filter_fields(ast, valid_fields)
+                    except ValueError as e:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="Invalid field used in filter: " + str(e),
+                        )
+                    try:
+                        validate_filter_ops(ast, valid_operations)
+                    except ValueError as e:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="Invalid operation used in filter: " + str(e),
+                        )
+
                     sa_expr = to_filter(ast, self.FIELD_MAPPING)
                     
                     geometry = get_geometry_filter(ast)
