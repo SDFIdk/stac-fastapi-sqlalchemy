@@ -567,11 +567,20 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 else None
             )
 
+            # Get query params
+            query_params = dict(kwargs["request"].query_params)
+            # parse and dump json to prettify link in case of "ugly" but valid input formatting
+            if "filter" in query_params:
+                    query_params["filter"] = json.dumps(
+                        json.loads(query_params["filter"])
+                    )  
+
             links = [
                 {
                     "rel": Relations.self.value,
                     "type": "application/geo+json",
-                    "href": str(kwargs["request"].url),
+                    #"href": str(kwargs["request"].url),
+                    "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?{urlencode(query_params)}",
                 },
                 {
                     "rel": Relations.root.value,
@@ -584,14 +593,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     "href": str(kwargs["request"].base_url),
                 },
             ]
-
-            # Get query params
-            query_params = dict(kwargs["request"].query_params)
-            # parse and dump json to prettify link in case of "ugly" but valid input formatting
-            if "filter" in query_params:
-                    query_params["filter"] = json.dumps(
-                        json.loads(query_params["filter"])
-                    )  
 
             # Avoid multiple pt query params on the same endpoint in response
             if pt is not None:
