@@ -160,7 +160,7 @@ def inOrderOpsCollect_rec(expr, pgf_ops) -> list:
             res = res + inOrderOpsCollect_rec(expr.rhs, pgf_ops)
     return res
 
-def validate_filter_ops(expr, valid_ops):
+def validate_filter_operations(expr, valid_ops):
     """Validate oeprations in filter expression
 
     Args:
@@ -912,7 +912,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         (base_queryables, collection_queryables,) = Queryables.get_queryable_properties_intersection(search_request.collections)
                         valid_fields = base_queryables + collection_queryables
                     else:
-                        (base_queryables,collection_queryables,) = Queryables.get_queryable_properties_intersection()
+                        (base_queryables, collection_queryables,) = Queryables.get_queryable_properties_intersection()
                         valid_fields = base_queryables + collection_queryables
 
                     # full list of operations supported in pygeofiler
@@ -932,7 +932,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                             detail="Invalid field used in filter: " + str(e),
                         )
                     try:
-                        validate_filter_ops(ast, valid_operations)
+                        validate_filter_operations(ast, valid_operations)
                     except ValueError as e:
                         raise HTTPException(
                             status_code=400,
