@@ -397,6 +397,12 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     )
             else:
                 filter_srid = self.storage_srid
+            
+            if filter_lang and self.extension_is_enabled("FilterExtension") and filter_lang != "cql-json":
+                raise HTTPException(
+                    status_code=400,
+                    detail="filter-lang is not a supported filter-language. Currently supported languages are: cql-json"
+                )
 
             # Transform footprint and bbox if necessary
             query = query.options(self._geometry_expression(output_srid))
@@ -463,12 +469,58 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     query = query.filter(self.item_table.datetime <= dts[1])
 
             if filter:
+                # Deserialize input filter parameter to Python object
+                filter = json.loads(filter)
+
+                # add filter-crs to filter geomtery
+                add_filter_crs(filter, filter_srid)
+
                 # monkey patch parse_geometry from pygeofilter
                 pygeofilter.backends.sqlalchemy.filters.parse_geometry = monkeypatch_parse_geometry
-                ast = pygeofilter.parsers.cql_json.parse(filter)
+
+                try: 
+                    ast = pygeofilter.parsers.cql_json.parse(filter)
+                except Exception as e: 
+                    raise HTTPException(
+                        status_code=400,
+                        detail="The input cql-json could not be parsed: " + str(e)
+                        )
+                if ast is None:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="The input cql-json could not be parsed" 
+                    )
+                
+                (base_queryables, collection_queryables,) = Queryables.get_queryable_properties_intersection()
+                valid_fields = base_queryables + collection_queryables
+
+                # full list of operations supported in pygeofiler
+                valid_operations = {
+                    **pygeofilter.parsers.cql_json.parser.COMPARISON_MAP,
+                    **pygeofilter.parsers.cql_json.parser.SPATIAL_PREDICATES_MAP,
+                    **pygeofilter.parsers.cql_json.parser.TEMPORAL_PREDICATES_MAP,
+                    # **pygeofilter.parsers.cql_json.parser.ARRAY_PREDICATES_MAP,
+                    **pygeofilter.parsers.cql_json.parser.ARITHMETIC_MAP,
+                }
+
+                try:
+                    validate_filter_fields(ast, valid_fields)
+                except ValueError as e:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Invalid field used in filter: " + str(e),
+                    )
+                try:
+                    validate_filter_operations(ast, valid_operations)
+                except ValueError as e:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Invalid operation used in filter: " + str(e),
+                    )
+
                 sa_expr = to_filter(ast, self.FIELD_MAPPING)
                 
-                geometry = get_geometry_filter(filter)
+                geometry = get_geometry_filter(ast)
                 if geometry is not None:
                     geom = shape(geometry)
                 if geom:
