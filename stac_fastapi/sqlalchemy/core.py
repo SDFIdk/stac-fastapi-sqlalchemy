@@ -1200,24 +1200,21 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 "matched": count,
             }
 
-        # Signe 06-08-2023 - This is not part of the upstream code
         # The response has to be returned as a ItemCollection type
-        return ItemCollection(
-        # Signe 06-08-2023 - This is not part of the upstream code
-        # resp = ItemCollection(
+        # return ItemCollection(
+        resp = ItemCollection(
             type="FeatureCollection",
             features=response_features,
             links=links,
             context=context_obj,
         )
 
-        # Signe 06-08-2023 - This is not part of the upstream code
-        # # If the CRS extension is enable we return the response here with an content-crs header 
-        # if self.extension_is_enabled("CrsExtension"):
-        #     return self.create_crs_response(resp, search_request.crs)
+        # If the CRS extension is enable we return the response here with an content-crs header 
+        if self.extension_is_enabled("CrsExtension"):
+            return self.create_crs_response(resp, search_request.crs)
 
-        # # If the CRS extension is disable we return the reponse here
-        # return resp
+        # If the CRS extension is disable we return the reponse here
+        return resp
 
 
 @attr.s
