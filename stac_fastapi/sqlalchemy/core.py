@@ -585,12 +585,14 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 {
                     "rel": Relations.root.value,
                     "type": "application/json",
-                    "href": str(kwargs["request"].base_url),
+                    #"href": str(kwargs["request"].base_url),
+                    "href": hrefbuilder.build("./"),
                 },
                 {
                     "rel": Relations.parent.value,
                     "type": "application/json",
-                    "href": str(kwargs["request"].base_url),
+                    #"href": str(kwargs["request"].base_url),
+                    "href": f"{kwargs['request'].base_url}collections/{collection_id}?token={query_params['token']}",
                 },
             ]
 
