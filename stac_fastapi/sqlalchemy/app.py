@@ -1,6 +1,9 @@
 """FastAPI application."""
 import os
 
+from typing import Optional
+from fastapi import security
+from fastapi.params import Depends
 from stac_fastapi.api.app import StacApi
 from stac_fastapi.api.models import create_get_request_model, create_post_request_model
 from stac_fastapi.extensions.core import (
@@ -22,6 +25,41 @@ from stac_fastapi.sqlalchemy.transactions import (
     BulkTransactionsClient,
     TransactionsClient,
 )
+
+def token_header_param(
+    header_token: Optional[str] = Depends(
+        security.api_key.APIKeyHeader(name="token", auto_error=False)
+    ),
+):
+    """This defines an api-key header param named 'token'"""
+    # Set auto_error to `True` to make `token `required.
+    pass
+
+
+def token_query_param(
+    query_token: Optional[str] = Depends(
+        security.api_key.APIKeyQuery(name="token", auto_error=False)
+    ),
+):
+    """This defines an api-key query param named 'token'"""
+    # Set auto_error to `True` to make `token `required.
+    pass
+
+
+# Here we add all paths which produces internal links as they must include the token
+ROUTES_REQUIRING_TOKEN = [
+    {"path": "/", "method": "GET"},
+    {"path": "/conformance", "method": "GET"},
+    {"path": "/search", "method": "GET"},
+    {"path": "/search", "method": "POST"},
+    {"path": "/collections", "method": "GET"},
+    {"path": "/collections/{collectionId}", "method": "GET"},
+    {"path": "/collections/{collectionId}/items", "method": "GET"},
+    {"path": "/collections/{collectionId}/items/{itemId}", "method": "GET"},
+    {"path": "/queryables", "method": "GET"},
+    {"path": "/collections/{collectionId}/queryables", "method": "GET"},
+    {"path": "/ping", "method": "GET"},
+]
 
 settings = SqlalchemySettings()
 session = Session.create_from_settings(settings)
@@ -52,6 +90,7 @@ api = StacApi(
     ),
     search_get_request_model=create_get_request_model(extensions),
     search_post_request_model=post_request_model,
+    route_dependencies=[(ROUTES_REQUIRING_TOKEN, [Depends(token_header_param), Depends(token_query_param)])],
 )
 app = api.app
 
