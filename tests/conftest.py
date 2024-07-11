@@ -7,10 +7,12 @@ from stac_fastapi.api.app import StacApi
 from stac_fastapi.api.models import create_request_model
 from stac_fastapi.extensions.core import (
     ContextExtension,
-    FieldsExtension,
+    # FieldsExtension,
     SortExtension,
     TokenPaginationExtension,
-    TransactionExtension,
+    # TransactionExtension,
+    CrsExtension,
+    FilterExtension,
 )
 from stac_fastapi.types.config import Settings
 from stac_fastapi.types.search import BaseSearchGetRequest, BaseSearchPostRequest
@@ -109,14 +111,16 @@ def postgres_bulk_transactions(db_session):
 def api_client(db_session):
     settings = SqlalchemySettings()
     extensions = [
-        TransactionExtension(
-            client=TransactionsClient(session=db_session), settings=settings
-        ),
+        # TransactionExtension(
+        #     client=TransactionsClient(session=db_session), settings=settings
+        # ),
         ContextExtension(),
         SortExtension(),
-        FieldsExtension(),
+        # FieldsExtension(),
         QueryExtension(),
         TokenPaginationExtension(),
+        CrsExtension(),
+        FilterExtension(),
     ]
 
     get_request_model = create_request_model(
