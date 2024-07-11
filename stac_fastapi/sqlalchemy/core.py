@@ -794,7 +794,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         return resp
 
     def post_search(
-        self, search_request: BaseSearchPostRequest, **kwargs
+        #self, search_request: BaseSearchPostRequest, **kwargs
+        self, search_request: BaseSearchPostRequest, is_direct_post = True, **kwargs
     ) -> ItemCollection:
         """POST search catalog."""
         #base_url = str(kwargs["request"].base_url)
