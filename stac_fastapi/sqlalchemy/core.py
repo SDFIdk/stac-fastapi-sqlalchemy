@@ -1085,15 +1085,49 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 )
 
             links = []
+            if is_direct_post:
+                query_params = dict(
+                    kwargs["request"]._json
+                )  # If direct post, get query_params from json body
+            else:
+                query_params = dict(kwargs["request"].query_params)
+                if "filter" in query_params:
+                    query_params["filter"] = json.dumps(
+                        json.loads(query_params["filter"])
+                    )  # parse and dump json to prettify link in case of "ugly" but valid input formatting
+
+            if not "limit" in query_params:
+                query_params.update(
+                    {"limit": search_request.limit}
+                )  # always include limit
+
+            links.append(
+                {
+                    "rel": Relations.self.value,
+                    "type": "application/geo+json",
+                    "href": hrefbuilder.build("./search"),
+                    "method": "POST",
+                    "body": {
+                        **query_params,
+                    },
+                }
+            )
+            if search_request.pt:
+                links[0]["body"]["pt"] = search_request.pt
+
             if page.next:
                 links.append(
                     {
                         "rel": Relations.next.value,
                         "type": "application/geo+json",
-                        "href": f"{kwargs['request'].base_url}search",
+                        # "href": f"{kwargs['request'].base_url}search",
+                        "href": hrefbuilder.build("./search"),
                         "method": "POST",
-                        #"body": {"token": page.next},
-                        "body": {"pt": page.next},
+                        # "body": {"token": page.next},
+                        "body": {
+                            **query_params,
+                            "pt": page.next,  # Pagination token must come after query_params for automatic overwrite of "pt"
+                        },
                         "merge": True,
                     }
                 )
@@ -1102,10 +1136,14 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     {
                         "rel": Relations.previous.value,
                         "type": "application/geo+json",
-                        "href": f"{kwargs['request'].base_url}search",
+                        # "href": f"{kwargs['request'].base_url}search",
+                        "href": hrefbuilder.build("./search"),
                         "method": "POST",
-                        #"body": {"token": page.previous},
-                        "body": {"pt": page.previous},
+                        # "body": {"token": page.previous},
+                        "body": {
+                            **query_params,
+                            "pt": page.previous,
+                        },
                         "merge": True,
                     }
                 )
