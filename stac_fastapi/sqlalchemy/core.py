@@ -580,7 +580,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     "rel": Relations.self.value,
                     "type": "application/geo+json",
                     #"href": str(kwargs["request"].url),
-                    #"href": f"{kwargs['request'].base_url}collections/{collection_id}/items?{urlencode(query_params)}",
                     "href": hrefbuilder.build(f"collections/{collection_id}/items", query_params),
                 },
                 {
@@ -593,7 +592,6 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     "rel": Relations.parent.value,
                     "type": "application/json",
                     #"href": str(kwargs["request"].base_url),
-                    #"href": f"{kwargs['request'].base_url}collections/{collection_id}?token={query_params['token']}",
                     "href": hrefbuilder.build(f"collections/{collection_id}", query_params),
 
                 },
