@@ -772,8 +772,10 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         # Do the request
         try:
             search_request = self.post_request_model(**base_args)
-        except ValidationError:
-            raise HTTPException(status_code=400, detail="Invalid parameters provided")
+        # except ValidationError:
+        except ValidationError as e:
+            #raise HTTPException(status_code=400, detail="Invalid parameters provided")
+            raise HTTPException(status_code=400, detail=f"Invalid parameters provided: {e.errors()}")
         resp = self.post_search(search_request, request=kwargs["request"])
         
         # Pagination
