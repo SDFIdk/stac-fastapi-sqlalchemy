@@ -782,14 +782,16 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         
         # Pagination
         page_links = []
+        hrefbuilder = self.href_builder(**kwargs)
         for link in resp["links"]:
-            #if link["rel"] == Relations.next or link["rel"] == Relations.previous:
+            # if link["rel"] == Relations.next or link["rel"] == Relations.previous:
             if link["rel"] == Relations.self or link["rel"] == Relations.next or link["rel"] == Relations.previous:
                 query_params = dict(kwargs["request"].query_params)
                 if link["body"] and link["merge"]:
                     query_params.update(link["body"])
                 link["method"] = "GET"
-                link["href"] = f"{link['href']}?{urlencode(query_params)}"
+                # link["href"] = f"{link['href']}?{urlencode(query_params)}"
+                link["href"] = hrefbuilder.build("search", query_params)
                 link["body"] = None
                 link["merge"] = False
                 page_links.append(link)
