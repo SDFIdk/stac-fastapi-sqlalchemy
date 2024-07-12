@@ -776,12 +776,13 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         except ValidationError as e:
             #raise HTTPException(status_code=400, detail="Invalid parameters provided")
             raise HTTPException(status_code=400, detail=f"Invalid parameters provided: {e.errors()}")
-        resp = self.post_search(search_request, request=kwargs["request"])
+        resp = self.post_search(search_request, False, request=kwargs["request"])
         
         # Pagination
         page_links = []
         for link in resp["links"]:
-            if link["rel"] == Relations.next or link["rel"] == Relations.previous:
+            #if link["rel"] == Relations.next or link["rel"] == Relations.previous:
+            if link["rel"] == Relations.self or link["rel"] == Relations.next or link["rel"] == Relations.previous:
                 query_params = dict(kwargs["request"].query_params)
                 if link["body"] and link["merge"]:
                     query_params.update(link["body"])
@@ -793,6 +794,12 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             else:
                 page_links.append(link)
         resp["links"] = page_links
+
+        # If the CRS extension is enable we return the response here with an content-crs header 
+        if self.extension_is_enabled("CrsExtension"):
+            return self.create_crs_response(resp, crs)
+        
+        # If the CRS extension is disable we return the response here
         return resp
 
     def post_search(
@@ -1113,6 +1120,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     "body": {
                         **query_params,
                     },
+                    "merge": True,
                 }
             )
             if search_request.pt:
@@ -1211,10 +1219,12 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         )
 
         # If the CRS extension is enable we return the response here with an content-crs header 
-        if self.extension_is_enabled("CrsExtension"):
+        if is_direct_post == True and self.extension_is_enabled("CrsExtension"):
             return self.create_crs_response(resp, search_request.crs)
 
-        # If the CRS extension is disable we return the reponse here
+        # If the CRS extension is disable or it is a call to `get_search` we return the reponse here 
+        # because `create_crs_response` changes the response from string json to json object, 
+        # and that triggers `get_search` to fail
         return resp
 
 
