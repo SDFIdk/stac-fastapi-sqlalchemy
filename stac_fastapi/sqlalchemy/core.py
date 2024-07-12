@@ -775,7 +775,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         # except ValidationError:
         except ValidationError as e:
             #raise HTTPException(status_code=400, detail="Invalid parameters provided")
-            raise HTTPException(status_code=400, detail=f"Invalid parameters provided: {e.errors()}")
+            raise HTTPException(status_code=400, detail=["Invalid parameters provided"] + str(e).split("\n"))
         resp = self.post_search(search_request, False, request=kwargs["request"])
         
         # Pagination
