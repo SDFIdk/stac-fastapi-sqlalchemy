@@ -764,17 +764,17 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 )
             base_args["sortby"] = sort_param
 
-        if fields:
-            includes = set()
-            excludes = set()
-            for field in fields:
-                if field[0] == "-":
-                    excludes.add(field[1:])
-                elif field[0] == "+":
-                    includes.add(field[1:])
-                else:
-                    includes.add(field)
-            base_args["fields"] = {"include": includes, "exclude": excludes}
+        # if fields:
+        #     includes = set()
+        #     excludes = set()
+        #     for field in fields:
+        #         if field[0] == "-":
+        #             excludes.add(field[1:])
+        #         elif field[0] == "+":
+        #             includes.add(field[1:])
+        #         else:
+        #             includes.add(field)
+        #     base_args["fields"] = {"include": includes, "exclude": excludes}
 
         # Do the request
         try:
