@@ -719,8 +719,10 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         #query: Optional[str] = None,
         #token: Optional[str] = None,
         pt: Optional[str] = None,
-        fields: Optional[List[str]] = None,
+        #fields: Optional[List[str]] = None,
         filter: Optional[str] = None,
+        filter_lang: Optional[str] = None,
+        filter_crs: Optional[str] = None,
         sortby: Optional[str] = None,
         intersects: Optional[str] = None,
         crs: Optional[str] = None,
@@ -736,8 +738,11 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             "limit": limit,
             #"token": token,
             "pt": pt,
+            "filter": json.loads(filter) if filter else filter,
+            "filter-lang": filter_lang,
+            "filter-crs": filter_crs,
             #"query": json.loads(unquote_plus(query)) if query else query,
-            "crs": crs
+            "crs": crs,
         }
 
         if datetime:
