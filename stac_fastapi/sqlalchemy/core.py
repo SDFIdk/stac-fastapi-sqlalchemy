@@ -371,7 +371,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     )
             else:
                 output_srid = self.storage_srid
-            
+
             # bbox_crs has a default value
             if bbox_crs and self.extension_is_enabled("CrsExtension"):
                 if self.get_extension("CrsExtension").is_crs_supported(bbox_crs):
@@ -830,41 +830,20 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             query = session.query(self.item_table)
 
             # crs has a default value
-            if search_request.crs and self.extension_is_enabled("CrsExtension"):
-                if self.get_extension("CrsExtension").is_crs_supported(search_request.crs):
-                    output_srid = self.get_extension("CrsExtension").epsg_from_crs(search_request.crs)
-                else:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="CRS provided for argument crs is invalid, valid options are: "
-                        + ",".join(self.get_extension("CrsExtension").crs),
-                    )
+            if self.extension_is_enabled("CrsExtension"):
+                output_srid = self.get_extension("CrsExtension").epsg_from_crs(search_request.crs)
             else:
                 output_srid = self.storage_srid
             
             # bbox_crs has a default value
-            if search_request.bbox_crs and self.extension_is_enabled("CrsExtension"):
-                if self.get_extension("CrsExtension").is_crs_supported(search_request.bbox_crs):
-                    bbox_srid = self.get_extension("CrsExtension").epsg_from_crs(search_request.bbox_crs)
-                else:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="CRS provided for argument bbox_crs is invalid, valid options are: "
-                        + ",".join(self.get_extension("CrsExtension").crs),
-                    )
+            if self.extension_is_enabled("CrsExtension"):
+                bbox_srid = self.get_extension("CrsExtension").epsg_from_crs(search_request.bbox_crs)
             else:
                 bbox_srid = self.storage_srid
 
             # filter_crs has a default value
-            if search_request.filter_crs and self.extension_is_enabled("CrsExtension"):
-                if self.get_extension("CrsExtension").is_crs_supported(search_request.filter_crs):
-                    filter_srid = self.get_extension("CrsExtension").epsg_from_crs(search_request.filter_crs)
-                else:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="CRS provided for argument filter_crs is invalid, valid options are: "
-                        + ",".join(self.get_extension("CrsExtension").crs),
-                    )
+            if self.extension_is_enabled("FilterExtension"):
+                filter_srid = self.get_extension("CrsExtension").epsg_from_crs(search_request.filter_crs)
             else:
                 filter_srid = self.storage_srid
 
