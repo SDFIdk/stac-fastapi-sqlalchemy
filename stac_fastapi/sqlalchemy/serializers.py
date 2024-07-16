@@ -108,7 +108,7 @@ class ItemSerializer(Serializer):
         add_links = [
             {
                 "rel": "license",
-                "href": "https://dataforsyningen.dk/Vilkaar",
+                "href": "https://sdfi.dk/om-os/vilkaar-og-priser",
                 "type": "text/html; charset=UTF-8",
                 "title": "SDFI license terms",
             },
