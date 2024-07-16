@@ -1,13 +1,13 @@
 """Pagination token client."""
 import abc
 import logging
-import os
+# import os
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from typing import Type
 
 import attr
 from sqlalchemy.orm import Session as SqlSession
-from stac_fastapi.types.errors import DatabaseError
+# from stac_fastapi.types.errors import DatabaseError
 
 from stac_fastapi.sqlalchemy.models import database
 from stac_fastapi.sqlalchemy.session import Session
