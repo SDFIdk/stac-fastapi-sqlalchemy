@@ -8,7 +8,7 @@ import urllib.parse
 import attr
 import geoalchemy2 as ga
 
-from pystac.utils import datetime_to_str
+# from pystac.utils import datetime_to_str
 
 from stac_fastapi.sqlalchemy.config import SqlalchemySettings
 

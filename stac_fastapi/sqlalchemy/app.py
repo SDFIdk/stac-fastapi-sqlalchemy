@@ -9,22 +9,22 @@ from stac_fastapi.api.models import create_get_request_model, create_post_reques
 from stac_fastapi.extensions.core import (
     ContextExtension,
     CrsExtension,
-    #FieldsExtension,
+    # FieldsExtension,
     FilterExtension,
     SortExtension,
     TokenPaginationExtension,
-    #TransactionExtension,
+    # TransactionExtension,
 )
-from stac_fastapi.extensions.third_party import BulkTransactionExtension
+# from stac_fastapi.extensions.third_party import BulkTransactionExtension
 
 from stac_fastapi.sqlalchemy.config import SqlalchemySettings
 from stac_fastapi.sqlalchemy.core import CoreCrudClient, CoreFiltersClient
-from stac_fastapi.sqlalchemy.extensions import QueryExtension
+# from stac_fastapi.sqlalchemy.extensions import QueryExtension
 from stac_fastapi.sqlalchemy.session import Session
-from stac_fastapi.sqlalchemy.transactions import (
-    BulkTransactionsClient,
-    TransactionsClient,
-)
+# from stac_fastapi.sqlalchemy.transactions import (
+#     BulkTransactionsClient,
+#     TransactionsClient,
+# )
 
 def token_header_param(
     header_token: Optional[str] = Depends(
@@ -64,10 +64,10 @@ ROUTES_REQUIRING_TOKEN = [
 settings = SqlalchemySettings()
 session = Session.create_from_settings(settings)
 extensions = [
-    #TransactionExtension(client=TransactionsClient(session=session), settings=settings),
-    #BulkTransactionExtension(client=BulkTransactionsClient(session=session)),
-    #FieldsExtension(),
-    #QueryExtension(),
+    # TransactionExtension(client=TransactionsClient(session=session), settings=settings),
+    # BulkTransactionExtension(client=BulkTransactionsClient(session=session)),
+    # FieldsExtension(),
+    # QueryExtension(),
     FilterExtension(client=CoreFiltersClient(session=session)),
     SortExtension(),
     TokenPaginationExtension(),
