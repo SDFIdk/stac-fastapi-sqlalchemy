@@ -1,7 +1,8 @@
 """Item crud client."""
 import json
 import logging
-import operator
+
+# import operator
 from datetime import datetime
 from typing import List, Optional, Set, Type, Union, Dict, Any
 from urllib.parse import unquote_plus, urlencode, urljoin
@@ -22,7 +23,6 @@ from sqlalchemy.orm import Session as SqlSession, with_expression
 from stac_fastapi.types.config import Settings
 from stac_fastapi.types.core import BaseCoreClient, BaseFiltersClient
 from stac_fastapi.types.errors import NotFoundError
-from stac_fastapi.types.links import BaseHrefBuilder
 from stac_fastapi.types.search import BaseSearchPostRequest
 from stac_fastapi.types.stac import Collection, Collections, Item, ItemCollection
 from stac_pydantic.links import Relations
@@ -32,7 +32,8 @@ import pygeofilter.parsers.cql_json
 
 from stac_fastapi.sqlalchemy import serializers
 from stac_fastapi.sqlalchemy.extensions.filter import QueryableTypes
-from stac_fastapi.sqlalchemy.extensions.query import Operator
+
+# from stac_fastapi.sqlalchemy.extensions.query import Operator
 from stac_fastapi.sqlalchemy.models import database
 from stac_fastapi.sqlalchemy.session import Session
 from stac_fastapi.sqlalchemy.tokens import PaginationTokenClient
@@ -267,7 +268,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         request = kwargs["request"]
         base_url = str(request.base_url)
         token = request.query_params.get("token")
-        # return BaseHrefBuilder(base_url, token)
+
         return ApiTokenHrefBuilder(base_url, token)
 
     def all_collections(self, **kwargs) -> Collections:
