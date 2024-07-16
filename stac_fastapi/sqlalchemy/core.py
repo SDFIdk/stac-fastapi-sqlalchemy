@@ -27,7 +27,8 @@ from stac_fastapi.types.errors import NotFoundError
 from stac_fastapi.types.search import BaseSearchPostRequest
 from stac_fastapi.types.stac import Collection, Collections, Item, ItemCollection
 from stac_pydantic.links import Relations
-from stac_pydantic.shared import MimeTypes
+#from stac_pydantic.shared import MimeTypes
+from stac_pydantic.shared import BBox, MimeTypes
 from pygeofilter.backends.sqlalchemy import to_filter
 import pygeofilter.parsers.cql_json
 
@@ -336,7 +337,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
     def item_collection(
         self,
         collection_id: str,
-        bbox: Optional[List[NumType]] = None,
+        bbox: Optional[BBox] = None,
         bbox_crs: str = None,
         datetime: Optional[str] = None,
         crs: Optional[str] = None,
@@ -712,7 +713,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         self,
         collections: Optional[List[str]] = None,
         ids: Optional[List[str]] = None,
-        bbox: Optional[List[NumType]] = None,
+        bbox: Optional[BBox] = None,
         bbox_crs: Optional[str] = None,
         datetime: Optional[Union[str, datetime]] = None,
         limit: Optional[int] = 10,
