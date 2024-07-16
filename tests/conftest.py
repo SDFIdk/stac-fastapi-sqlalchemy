@@ -50,15 +50,15 @@ def cleanup(postgres_core: CoreCrudClient, postgres_transactions: TransactionsCl
             items = postgres_core.item_collection(
                 coll["id"], limit=100, request=MockStarletteRequest
             )
-            for feat in items["features"]:
-                postgres_transactions.delete_item(
-                    feat["id"], feat["collection"], request=MockStarletteRequest
-                )
+            # for feat in items["features"]:
+            #     postgres_transactions.delete_item(
+            #         feat["id"], feat["collection"], request=MockStarletteRequest
+            #     )
 
-            # Delete the collection
-            postgres_transactions.delete_collection(
-                coll["id"], request=MockStarletteRequest
-            )
+            # # Delete the collection
+            # postgres_transactions.delete_collection(
+            #     coll["id"], request=MockStarletteRequest
+            # )
 
 
 @pytest.fixture
