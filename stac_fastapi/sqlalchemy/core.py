@@ -12,7 +12,8 @@ import geoalchemy2 as ga
 import sqlalchemy as sa
 import stac_pydantic
 from fastapi import HTTPException
-from fastapi.responses import JSONResponse
+#from fastapi.responses import JSONResponse
+from stac_fastapi.api.models import GeoJSONResponse
 from pydantic import ValidationError
 from shapely.geometry import Polygon as ShapelyPolygon
 from shapely.geometry import shape
@@ -253,13 +254,13 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             ),
         )
 
-    def create_crs_response(self, resp, crs, **kwargs) -> JSONResponse:
-        """Add Content-Crs header to JSONResponse to comply with OGC API Feat part 2"""
+    def create_crs_response(self, resp, crs, **kwargs) -> GeoJSONResponse:
+        """Add Content-Crs header to GeoJSONResponse to comply with OGC API Feat part 2"""
         crs_ext = self.get_extension("CrsExtension")
         if crs is None:
             crs = crs_ext.storageCrs
         if crs in crs_ext.crs:  # If the CRS is valid
-            return JSONResponse(resp, headers={"Content-Crs": crs})
+            return GeoJSONResponse(resp, headers={"Content-Crs": crs})
         else:
             return resp
 
