@@ -90,7 +90,12 @@ def test_get_collection_forwarded_header(app_client, load_test_data):
         headers={"Forwarded": "proto=https;host=testserver:1234"},
     )
     for link in resp.json()["links"]:
-        assert link["href"].startswith("https://testserver:1234/")
+        # assert link["href"].startswith("https://testserver:1234/")
+        if link["href"].startswith("https://testserver:1234/"):
+            assert link["href"].startswith("https://testserver:1234/")
+        else:
+            # We have a license URL that does not start with the same host as the rest of the URL's 
+            assert link["href"].startswith("https://sdfi.dk/")
 
 
 def test_get_collection_x_forwarded_headers(app_client, load_test_data):
@@ -105,7 +110,12 @@ def test_get_collection_x_forwarded_headers(app_client, load_test_data):
         },
     )
     for link in resp.json()["links"]:
-        assert link["href"].startswith("https://testserver:1234/")
+        # assert link["href"].startswith("https://testserver:1234/")
+        if link["href"].startswith("https://testserver:1234/"):
+            assert link["href"].startswith("https://testserver:1234/")
+        else:
+            # We have a license URL that does not start with the same host as the rest of the URL's 
+            assert link["href"].startswith("https://sdfi.dk/")
 
 
 def test_get_collection_duplicate_forwarded_headers(app_client, load_test_data):
@@ -121,4 +131,9 @@ def test_get_collection_duplicate_forwarded_headers(app_client, load_test_data):
         },
     )
     for link in resp.json()["links"]:
-        assert link["href"].startswith("https://testserver:1234/")
+        # assert link["href"].startswith("https://testserver:1234/")
+        if link["href"].startswith("https://testserver:1234/"):
+            assert link["href"].startswith("https://testserver:1234/")
+        else:
+            # We have a license URL that does not start with the same host as the rest of the URL's 
+            assert link["href"].startswith("https://sdfi.dk/")
