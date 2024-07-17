@@ -771,6 +771,13 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             # https://github.com/radiantearth/stac-spec/tree/master/api-spec/extensions/sort#http-get-or-post-form
             sort_param = []
             for sort in sortby:
+                if (sort[0] == " "):  # https://www.w3.org/Addressing/URL/uri-spec.html non-urlencoded "+" signs turn into " ".
+                    raise HTTPException(
+                        status_code=400,
+                        detail=[
+                            f"Invalid parameters provided, if using + notation (+{sort[1:]}), remember to URL encode the request"
+                        ],
+                    )
                 sort_param.append(
                     {
                         "field": sort[1:],
