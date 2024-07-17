@@ -1,174 +1,174 @@
 {
-  "type": "Feature",
-  "stac_version": "1.0.0",
-  "stac_extensions": [
-      "https://stac-extensions.github.io/view/v1.0.0/schema.json",
-      "https://stac-extensions.github.io/projection/v1.0.0/schema.json",
-      "https://raw.githubusercontent.com/stac-extensions/perspective-imagery/main/json-schema/schema.json"
-  ],
-  "id": "2023_85_47_1_0023_00001500",
-  "collection": "skraafotos2023",
-  "geometry": {
-      "type": "Polygon",
-      "coordinates": [
-          [
-              [
-                  12.365147434865271,
-                  55.58573042058954
-              ],
-              [
-                  12.397606699109469,
-                  55.58499191568279
-              ],
-              [
-                  12.396689740626504,
-                  55.572457634187785
-              ],
-              [
-                  12.36428647651386,
-                  55.57319684545269
-              ],
-              [
-                  12.365147434865271,
-                  55.58573042058954
-              ]
-          ]
-      ]
-  },
-  "bbox": [
-      12.36428647651386,
-      55.572457634187785,
-      12.397606699109469,
-      55.58573042058954
-  ],
-  "properties": {
-      "datetime": "2023-09-02T15:17:04Z",
-      "gsd": 0.1,
-      "license": "various",
-      "platform": "Fixed-wing aircraft",
-      "instruments": [
-          "UCOp41_434S42016X419232_Lvl02-PAN"
-      ],
-      "providers": [
-          {
-              "name": "geofly",
-              "roles": [
-                  "producer"
-              ]
-          },
-          {
-              "url": "https://sdfi.dk/",
-              "name": "SDFI",
-              "roles": [
-                  "licensor",
-                  "host"
-              ]
-          }
-      ],
-      "proj:epsg": null,
-      "proj:shape": [
-          14016.0,
-          20544.0
-      ],
-      "direction": "nadir",
-      "estimated_accuracy": null,
-      "pers:omega": 0.04437,
-      "pers:phi": -0.00702,
-      "pers:kappa": 0.488889,
-      "pers:perspective_center": [
-          713102.37,
-          6164422.516,
-          2111.837
-      ],
-      "pers:crs": 25832,
-      "pers:vertical_crs": 5799,
-      "pers:rotation_matrix": [
-          0.9999635890367438,
-          0.008532521749846448,
-          0.0001291252979473603,
-          -0.008532619122283248,
-          0.9999632975131375,
-          0.0007733288865591295,
-          -0.00012252211318345842,
-          -0.0007744025058958921,
-          0.9999996926444981
-      ],
-      "pers:interior_orientation": {
-          "camera_id": "UCOp41_434S42016X419232_Lvl02-PAN",
-          "focal_length": 79.6,
-          "pixel_spacing": [
-              0.00376,
-              0.00376
-          ],
-          "calibration_date": "2021-03-29",
-          "principal_point_offset": [
-              0.0,
-              0.0
-          ],
-          "sensor_array_dimensions": [
-              20544.0,
-              14016.0
-          ]
-      },
-      "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2023/10km_616_71/1km_6164_713/2023_85_47_1_0023_00001500.tif",
-      "asset:thumbnail": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2023%2F10km_616_71%2F1km_6164_713%2F2023_85_47_1_0023_00001500.tif",
-      "crs": {
-          "type": "name",
-          "properties": {
-              "name": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-          }
-      }
-  },
-  "links": [
-      {
-          "rel": "self",
-          "type": "application/geo+json",
-          "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2023/items/2023_85_47_1_0023_00001500"
-      },
-      {
-          "rel": "parent",
-          "type": "application/json",
-          "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2023"
-      },
-      {
-          "rel": "collection",
-          "type": "application/json",
-          "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2023"
-      },
-      {
-          "rel": "root",
-          "type": "application/json",
-          "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/"
-      },
-      {
-          "rel": "license",
-          "href": "https://sdfi.dk/om-os/vilkaar-og-priser",
-          "type": "text/html; charset=UTF-8",
-          "title": "SDFI license terms"
-      },
-      {
-          "rel": "alternate",
-          "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/viewer.html?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2023%2F10km_616_71%2F1km_6164_713%2F2023_85_47_1_0023_00001500.tif",
-          "type": "text/html; charset=UTF-8",
-          "title": "Interactive image viewer"
-      }
-  ],
-  "assets": {
-      "data": {
-          "href": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2023/10km_616_71/1km_6164_713/2023_85_47_1_0023_00001500.tif",
-          "type": "image/tiff; application=geotiff; profile=cloud-optimized",
-          "roles": [
-              "data"
-          ],
-          "title": "Raw tiff file"
-      },
-      "thumbnail": {
-          "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2023%2F10km_616_71%2F1km_6164_713%2F2023_85_47_1_0023_00001500.tif",
-          "type": "image/jpeg",
-          "roles": [
-              "thumbnail"
-          ],
-          "title": "Thumbnail"
-      }
-  }
+    "type": "Feature",
+    "stac_version": "1.0.0",
+    "stac_extensions": [
+        "https://stac-extensions.github.io/view/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/projection/v1.0.0/schema.json",
+        "https://raw.githubusercontent.com/stac-extensions/perspective-imagery/main/json-schema/schema.json"
+    ],
+    "id": "2021_82_20_1_0001_00005355",
+    "collection": "skraafotos2021",
+    "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [
+                    8.871427841876088,
+                    55.83475910024735
+                ],
+                [
+                    8.904291486155465,
+                    55.834863144377664
+                ],
+                [
+                    8.904365749556561,
+                    55.82227598852658
+                ],
+                [
+                    8.871628334514158,
+                    55.82215387448031
+                ],
+                [
+                    8.871427841876088,
+                    55.83475910024735
+                ]
+            ]
+        ]
+    },
+    "bbox": [
+        8.871427841876088,
+        55.82215387448031,
+        8.904365749556561,
+        55.834863144377664
+    ],
+    "properties": {
+        "datetime": "2021-11-22T10:03:41Z",
+        "gsd": 0.1,
+        "license": "various",
+        "platform": "Fixed-wing aircraft",
+        "instruments": [
+            "UCOM4-434S42016X419232_Nadir"
+        ],
+        "providers": [
+            {
+                "name": "Geofly GmbH",
+                "roles": [
+                    "producer"
+                ]
+            },
+            {
+                "url": "https://sdfi.dk/",
+                "name": "SDFI",
+                "roles": [
+                    "licensor",
+                    "host"
+                ]
+            }
+        ],
+        "proj:epsg": null,
+        "proj:shape": [
+            14016.0,
+            20544.0
+        ],
+        "direction": "nadir",
+        "estimated_accuracy": null,
+        "pers:omega": 0.10449,
+        "pers:phi": -0.07326,
+        "pers:kappa": 0.2587,
+        "pers:perspective_center": [
+            492977.451,
+            6186994.511,
+            2148.4
+        ],
+        "pers:crs": 25832,
+        "pers:vertical_crs": 5799,
+        "pers:rotation_matrix": [
+            0.999988989215209,
+            0.004512812123378186,
+            0.0012868469542930228,
+            -0.004515147742455537,
+            0.9999881542668918,
+            0.0018179017461516862,
+            -0.0012786278616083075,
+            -0.0018236920337473502,
+            0.9999975196260027
+        ],
+        "pers:interior_orientation": {
+            "camera_id": "UCOM4-434S42016X419232_Nadir",
+            "focal_length": 79.6,
+            "pixel_spacing": [
+                0.00376,
+                0.00376
+            ],
+            "calibration_date": "2021-03-29",
+            "principal_point_offset": [
+                0.0,
+                0.0
+            ],
+            "sensor_array_dimensions": [
+                20544.0,
+                14016.0
+            ]
+        },
+        "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2021/10km_618_49/1km_6187_492/2021_82_20_1_0001_00005355.tif",
+        "asset:thumbnail": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2021%2F10km_618_49%2F1km_6187_492%2F2021_82_20_1_0001_00005355.tif",
+        "crs": {
+            "type": "name",
+            "properties": {
+                "name": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+            }
+        }
+    },
+    "links": [
+        {
+            "rel": "self",
+            "type": "application/geo+json",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2021/items/2021_82_20_1_0001_00005355"
+        },
+        {
+            "rel": "parent",
+            "type": "application/json",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2021"
+        },
+        {
+            "rel": "collection",
+            "type": "application/json",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2021"
+        },
+        {
+            "rel": "root",
+            "type": "application/json",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/"
+        },
+        {
+            "rel": "license",
+            "href": "https://sdfi.dk/om-os/vilkaar-og-priser",
+            "type": "text/html; charset=UTF-8",
+            "title": "SDFI license terms"
+        },
+        {
+            "rel": "alternate",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/viewer.html?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2021%2F10km_618_49%2F1km_6187_492%2F2021_82_20_1_0001_00005355.tif",
+            "type": "text/html; charset=UTF-8",
+            "title": "Interactive image viewer"
+        }
+    ],
+    "assets": {
+        "data": {
+            "href": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2021/10km_618_49/1km_6187_492/2021_82_20_1_0001_00005355.tif",
+            "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+            "roles": [
+                "data"
+            ],
+            "title": "Raw tiff file"
+        },
+        "thumbnail": {
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2021%2F10km_618_49%2F1km_6187_492%2F2021_82_20_1_0001_00005355.tif",
+            "type": "image/jpeg",
+            "roles": [
+                "thumbnail"
+            ],
+            "title": "Thumbnail"
+        }
+    }
 }
