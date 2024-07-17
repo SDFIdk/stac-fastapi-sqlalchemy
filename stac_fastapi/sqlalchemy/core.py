@@ -602,23 +602,37 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             if pt is not None:
                 del query_params["pt"]
 
+            # Always include limit
+            if not "limit" in query_params:
+                query_params.update(
+                    {"limit": limit}
+                )  
+
             if page.next:
+                # Add page.next to query params
+                query_params.update(
+                    {"pt": page.next}
+                )  
                 links.append(
                     {
                         "rel": Relations.next.value,
                         "type": "application/geo+json",
                         # "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?token={page.next}&limit={limit}",
-                        "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?{urlencode(query_params)}&pt={page.next}",
+                        "href": hrefbuilder.build(f"collections/{collection_id}/items", query_params),
                         "method": "GET",
                     }
                 )
             if page.previous:
+                # Add page.previous to query params
+                query_params.update(
+                    {"pt": page.previous}
+                )  
                 links.append(
                     {
                         "rel": Relations.previous.value,
                         "type": "application/geo+json",
                         # "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?token={page.previous}&limit={limit}",
-                        "href": f"{kwargs['request'].base_url}collections/{collection_id}/items?{urlencode(query_params)}&pt={page.previous}",
+                        "href": hrefbuilder.build(f"collections/{collection_id}/items", query_params),
                         "method": "GET",
                     }
                 )
