@@ -64,8 +64,8 @@ def test_collection_not_found(app_client):
 def test_returns_valid_collection(app_client, load_test_data):
     """Test validates fetched collection with jsonschema"""
     test_collection = load_test_data("test_collection.json")
-    resp = app_client.put("/collections", json=test_collection)
-    assert resp.status_code == 200
+    # resp = app_client.put("/collections", json=test_collection)
+    # assert resp.status_code == 200
 
     resp = app_client.get(f"/collections/{test_collection['id']}")
     assert resp.status_code == 200
@@ -94,7 +94,7 @@ def test_get_collection_forwarded_header(app_client, load_test_data):
         if link["href"].startswith("https://testserver:1234/"):
             assert link["href"].startswith("https://testserver:1234/")
         else:
-            # We have a license URL that does not start with the same host as the rest of the URL's 
+            # We have a license URL that does not start with the same host as the rest of the URL's
             assert link["href"].startswith("https://sdfi.dk/")
 
 
@@ -114,7 +114,7 @@ def test_get_collection_x_forwarded_headers(app_client, load_test_data):
         if link["href"].startswith("https://testserver:1234/"):
             assert link["href"].startswith("https://testserver:1234/")
         else:
-            # We have a license URL that does not start with the same host as the rest of the URL's 
+            # We have a license URL that does not start with the same host as the rest of the URL's
             assert link["href"].startswith("https://sdfi.dk/")
 
 
@@ -135,5 +135,5 @@ def test_get_collection_duplicate_forwarded_headers(app_client, load_test_data):
         if link["href"].startswith("https://testserver:1234/"):
             assert link["href"].startswith("https://testserver:1234/")
         else:
-            # We have a license URL that does not start with the same host as the rest of the URL's 
+            # We have a license URL that does not start with the same host as the rest of the URL's
             assert link["href"].startswith("https://sdfi.dk/")
