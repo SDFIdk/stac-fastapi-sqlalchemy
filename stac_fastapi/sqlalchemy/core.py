@@ -457,16 +457,20 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             # Temporal query
             if datetime:
                 # Non-interval date ex. "2000-02-02T00:00:00.00Z"
-                if len(datetime) == 1:
-                    query = query.filter(self.item_table.datetime == datetime[0])
+                #if len(datetime) == 1:
+                if type(datetime) != tuple:
+                    query = query.filter(self.item_table.datetime == datetime)
                 # is there a benefit to between instead of >= and <= ?
-                elif datetime[0] not in ["", ".."] and datetime[1] not in ["", ".."]:
+                # 2000-02-02T00:00:00.00Z/2000-02-02T00:00:00.00Z
+                elif datetime[0] and datetime[1]:
                     query = query.filter(self.item_table.datetime.between(*datetime))
                 # All items after the start date
-                elif datetime[0] not in ["", ".."]:
+                # 2000-02-02T00:00:00.00Z/.. or 2000-02-02T00:00:00.00Z/
+                elif datetime[0]:
                     query = query.filter(self.item_table.datetime >= datetime[0])
                 # All items before the end date
-                elif datetime[1] not in ["", ".."]:
+                # ../2000-02-02T00:00:00.00Z or /2000-02-02T00:00:00.00Z
+                elif datetime[1]:
                     query = query.filter(self.item_table.datetime <= datetime[1])
 
             if filter:
@@ -1054,16 +1058,20 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 # Temporal query
                 if search_request.datetime:
                     # Non-interval date ex. "2000-02-02T00:00:00.00Z"
-                    if len(search_request.datetime) == 1:
-                        query = query.filter(self.item_table.datetime == search_request.datetime[0])
+                    #if len(search_request.datetime) == 1:
+                    if type(search_request.datetime) != tuple:
+                        query = query.filter(self.item_table.datetime == search_request.datetime)
                     # is there a benefit to between instead of >= and <= ?
-                    elif search_request.datetime[0] not in ["", ".."] and search_request.datetime[1] not in ["", ".."]:
+                    # 2000-02-02T00:00:00.00Z/2000-02-02T00:00:00.00Z
+                    elif search_request.datetime[0] and search_request.datetime[1]:
                         query = query.filter(self.item_table.datetime.between(*search_request.datetime))
                     # All items after the start date
-                    elif search_request.datetime[0] not in ["", ".."]:
+                    # 2000-02-02T00:00:00.00Z/.. or 2000-02-02T00:00:00.00Z/
+                    elif search_request.datetime[0]:
                         query = query.filter(self.item_table.datetime >= search_request.datetime[0])
                     # All items before the end date
-                    elif search_request.datetime[1] not in ["", ".."]:
+                    # ../2000-02-02T00:00:00.00Z or /2000-02-02T00:00:00.00Z
+                    elif search_request.datetime[1]:
                         query = query.filter(self.item_table.datetime <= search_request.datetime[1])
 
                 # We don't support query parameter `query`
