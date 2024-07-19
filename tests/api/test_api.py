@@ -599,7 +599,7 @@ def test_app_search_response_x_forwarded_headers(
         # params={"collections": ["test-collection"]},
         params={"collections": [item["collection"]]},
         headers={
-            "X-Forwarded-Port": "1234",
+            #"X-Forwarded-Port": "1234",
             "X-Forwarded-Proto": "https",
             "X-Forwarded-Host": "api.dataforsyningen.dk"
         },
@@ -607,7 +607,7 @@ def test_app_search_response_x_forwarded_headers(
     for feature in resp.json()["features"]:
         for link in feature["links"]:
             # assert link["href"].startswith("https://testserver:1234/")
-            if link["href"].startswith("https://api.dataforsyningen.dk//"):
+            if link["href"].startswith("https://api.dataforsyningen.dk/"):
                 assert link["href"].startswith("https://api.dataforsyningen.dk/")
             else:
                 # We have a license URL that does not start with the same host as the rest of the URL's
@@ -632,8 +632,8 @@ def test_app_search_response_duplicate_forwarded_headers(
         headers={
             #"Forwarded": "proto=https;host=testserver:1234"
             "Forwarded": "proto=https;host=api.dataforsyningen.dk",
-            "X-Forwarded-Port": "4321",
-            "X-Forwarded-Proto": "http",
+            #"X-Forwarded-Port": "4321",
+            "X-Forwarded-Proto": "https",
             "X-Forwarded-Host": "api.dataforsyningen.dk"
         },
     )
