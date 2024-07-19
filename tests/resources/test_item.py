@@ -1,4 +1,5 @@
 import json
+import orjson
 import os
 import time
 import uuid
@@ -947,13 +948,35 @@ def test_field_extension_exclude_default_includes(app_client, load_test_data):
     assert "geometry" not in resp_json["features"][0]
 
 
-def test_search_intersects_and_bbox(app_client):
+#def test_search_intersects_and_bbox(app_client):
+def test_search_intersects_and_bbox(load_test_data, app_client):
     """Test POST search intersects and bbox are mutually exclusive (core)"""
-    bbox = [-118, 34, -117, 35]
-    geoj = Polygon.from_bounds(*bbox).__geo_interface__
-    params = {"bbox": bbox, "intersects": geoj}
+    item = load_test_data("test_item.json")
+
+    point = [8.4570, 56.24298]
+    intersects = {"type": "Point", "coordinates": point}
+    bbox = [8.4570, 56.24298, 8.5570, 56.34298]
+
+    params = {
+        "intersects": intersects,
+        "collections": [item["collection"]],
+        "bbox": bbox,
+    }
     resp = app_client.post("/search", json=params)
     assert resp.status_code == 400
+    resp_json = resp.json()
+    assert "[{'loc': ('body', 'intersects'), 'msg': 'intersects and bbox parameters are mutually exclusive', 'type': 'value_error'}]" in resp_json["description"]
+
+    get_params = {
+        "intersects": orjson.dumps(params["intersects"]).decode("utf-8"),
+        "collections": item["collection"],
+        "bbox": "8.4570, 56.24298, 8.5570, 56.34298",
+    }
+
+    resp = app_client.get("/search", params=get_params)
+    assert resp.status_code == 400
+    resp_json = resp.json()
+    assert "  intersects and bbox parameters are mutually exclusive (type=value_error)" in resp_json["detail"][3]
 
 
 def test_get_missing_item(app_client, load_test_data):
