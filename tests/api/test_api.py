@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 from urllib.parse import quote_plus
 
 import pytest
@@ -309,7 +309,8 @@ def test_app_filter_extension_limit_gt10000(app_client):
     assert resp.status_code == 200
 
 
-def test_app_sort_extension(load_test_data, app_client, postgres_transactions):
+# def test_app_sort_extension(load_test_data, app_client, postgres_transactions):
+def test_app_sort_extension( app_client):
     # first_item = load_test_data("test_item.json")
     # item_date = datetime.strptime(
     #     first_item["properties"]["datetime"], "%Y-%m-%dT%H:%M:%SZ"
