@@ -27,6 +27,15 @@ STAC_CORE_ROUTES = [
 #     "PUT /collections/{collection_id}/items/{item_id}",
 # ]
 
+STAC_ROUTES_REQUIRING_TOKEN = [
+    {"path": "/", "method": "GET"},
+    {"path": "/search", "method": "GET"},
+    {"path": "/search", "method": "POST"},
+    {"path": "/collections", "method": "GET"},
+    {"path": "/collections/{collectionId}", "method": "GET"},
+    {"path": "/collections/{collectionId}/items", "method": "GET"},
+    {"path": "/collections/{collectionId}/items/{itemId}", "method": "GET"},
+]
 
 def test_post_search_content_type(app_client):
     params = {"limit": 1}
@@ -713,3 +722,83 @@ def test_item_collection_filter_datetime(
     assert resp.status_code == 200
     resp_json = resp.json()
     assert len(resp_json["features"]) == 0
+
+
+# Check that the hardcoded queryable names matches an equivalent in QueryableTypes, and in result property names
+def test_filter_queryables_config(load_test_data):
+    from stac_fastapi.sqlalchemy.extensions.filter import BaseQueryables, SkraafotosProperties, QueryableTypes
+
+    queryable_enums = list(BaseQueryables._member_names_) + list(
+        SkraafotosProperties._member_names_
+    )
+    queryable_info = list([i for i in QueryableTypes.__dict__.keys() if i[:1] != "_"])
+
+    assert len(queryable_enums) == len(queryable_info)
+    for x, y in zip(queryable_enums, queryable_info):
+        assert x == y
+
+    test_item = load_test_data("test_item.json")
+    queryable_enum_vals = list(BaseQueryables._value2member_map_) + list(
+        SkraafotosProperties._value2member_map_
+    )
+    # all items in the database have null values for view:azimuth and view:off_nadir
+    # so the test_item response json does not have element view:azimuth and view:off_nadir
+    # because they are None
+    queryable_enum_vals.remove("view:azimuth")
+    queryable_enum_vals.remove("view:off_nadir")
+    response_props = list(test_item.keys()) + list(test_item["properties"].keys())
+    
+    for q in queryable_enum_vals:
+        q = q.split(".")[0]
+        assert q in response_props
+
+
+def test_filter_queryables_single_collection(app_client, load_test_data):
+    test_item = load_test_data("test_item.json")
+    resp = app_client.get(f"/collections/{test_item['collection']}/queryables")
+    assert resp.status_code == 200
+
+    """Test read a collection which does not exist"""
+    resp = app_client.get("/collections/does-not-exist/queryables")
+    assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["detail"] == [
+        "Not found",
+        "Collection 'does-not-exist' doesn't exist",
+    ]
+
+
+def test_filter_queryables_all_collections(app_client):
+    """Test GET queryables without collection parameter returns intersection of queryables of all registered collections"""
+    resp = app_client.get(f"/collections")
+    resp_json = resp.json()
+
+    all_queryables = []
+    for coll in resp_json["collections"]:
+        q = app_client.get(f"/collections/{coll['id']}/queryables")
+        assert q.status_code == 200
+        q_json = q.json()
+        all_queryables.append(list(q_json["properties"].keys()))
+    shared_queryables = set.intersection(*[set(x) for x in all_queryables])
+
+    resp = app_client.get(f"/queryables")
+    assert resp.status_code == 200
+    resp_json = resp.json()
+    assert len(resp_json["properties"]) == len(shared_queryables)
+
+
+def test_app_path_allowing_token_should_return_links_with_token(
+    load_test_data, token_app_client
+):
+    item = load_test_data("test_item.json")
+
+    params = {"token": "TESTTOKEN"}
+
+    for route in STAC_ROUTES_REQUIRING_TOKEN:
+        path = route["path"].format(itemId=item["id"], collectionId=item["collection"])
+        if route["method"] == "GET":
+            resp = token_app_client.get(path, params=params)
+        else:
+            resp = token_app_client.post(path, json={}, params=params)
+        assert resp.status_code == 200
+        assert b"token=TESTTOKEN" in resp.content

@@ -1,6 +1,7 @@
 import json
 import os
 from typing import Callable, Dict
+from fastapi.params import Depends
 
 import pytest
 from stac_fastapi.api.app import StacApi
@@ -19,13 +20,18 @@ from stac_fastapi.types.search import BaseSearchGetRequest, BaseSearchPostReques
 from starlette.testclient import TestClient
 
 from stac_fastapi.sqlalchemy.config import SqlalchemySettings
-from stac_fastapi.sqlalchemy.core import CoreCrudClient
-from stac_fastapi.sqlalchemy.extensions import QueryExtension
+from stac_fastapi.sqlalchemy.core import CoreCrudClient, CoreFiltersClient
+# from stac_fastapi.sqlalchemy.extensions import QueryExtension
 from stac_fastapi.sqlalchemy.models import database
 from stac_fastapi.sqlalchemy.session import Session
 from stac_fastapi.sqlalchemy.transactions import (
     BulkTransactionsClient,
     TransactionsClient,
+)
+from stac_fastapi.sqlalchemy.app import (
+    token_header_param,
+    token_query_param,
+    ROUTES_REQUIRING_TOKEN,
 )
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
@@ -91,7 +97,7 @@ def postgres_core(db_session):
         session=db_session,
         item_table=database.Item,
         collection_table=database.Collection,
-        token_table=database.PaginationToken,
+        # token_table=database.PaginationToken,
     )
 
 
@@ -119,10 +125,11 @@ def api_client(db_session):
         ContextExtension(),
         SortExtension(),
         # FieldsExtension(),
-        QueryExtension(),
+        # QueryExtension(),
         TokenPaginationExtension(),
         CrsExtension(),
-        FilterExtension(),
+        #FilterExtension(),
+        FilterExtension(client=CoreFiltersClient(session=db_session)),
     ]
 
     get_request_model = create_request_model(
@@ -158,5 +165,15 @@ def app_client(api_client, load_test_data, postgres_transactions):
     #coll = load_test_data("test_collection.json")
     #postgres_transactions.create_collection(coll, request=MockStarletteRequest)
 
+    with TestClient(api_client.app) as test_app:
+        yield test_app
+
+@pytest.fixture
+def token_app_client(api_client):
+    """Gets a TestClient with an app that requires `token` for some paths"""
+    api_client.add_route_dependencies(
+        scopes=ROUTES_REQUIRING_TOKEN,
+        dependencies=[Depends(token_header_param), Depends(token_query_param)],
+    )
     with TestClient(api_client.app) as test_app:
         yield test_app
