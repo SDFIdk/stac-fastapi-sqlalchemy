@@ -1036,12 +1036,15 @@ def test_search_invalid_query_field(app_client):
 
 def test_search_bbox_errors(app_client):
     body = {"query": {"bbox": [0]}}
+    # body = {"query": {"bbox": [0]}}
+    body = {"bbox": [0]}
     resp = app_client.post("/search", json=body)
     assert resp.status_code == 400
 
-    body = {"query": {"bbox": [100.0, 0.0, 0.0, 105.0, 1.0, 1.0]}}
-    resp = app_client.post("/search", json=body)
-    assert resp.status_code == 400
+    # 3D bounding box is allowed
+    # body = {"query": {"bbox": [100.0, 0.0, 0.0, 105.0, 1.0, 1.0]}}
+    # resp = app_client.post("/search", json=body)
+    # assert resp.status_code == 400
 
     params = {"bbox": "100.0,0.0,0.0,105.0"}
     resp = app_client.get("/search", params=params)
@@ -1077,7 +1080,8 @@ def test_search_datetime_validation_errors(app_client):
         "1986-04-12T23:20:50.52Z/1985-04-12T23:20:50.52Z",
     ]
     for dt in bad_datetimes:
-        body = {"query": {"datetime": dt}}
+        # body = {"query": {"datetime": dt}}
+        body = {"datetime": dt}
         resp = app_client.post("/search", json=body)
         assert resp.status_code == 400
 
