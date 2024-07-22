@@ -682,11 +682,11 @@ def test_item_search_properties_field(app_client, load_test_data):
 
     # Orientation is an indexed field
     # params = {"query": {"orientation": {"eq": "south"}}}
-    params = {"filter-lang": "cql-json", "filter": {"eq": [{"property": "gsd"}, "-1"]}}
+    params = {"filter-lang": "cql-json", "filter": {"eq": [{"property": "gsd"}, "0.075"]}}
     resp = app_client.post("/search", json=params)
     assert resp.status_code == 200
     resp_json = resp.json()
-    assert len(resp_json["features"]) == 333900
+    assert len(resp_json["features"]) == 10
 
 
 def test_item_search_get_query_extension(app_client, load_test_data):
