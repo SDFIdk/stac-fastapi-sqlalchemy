@@ -58,7 +58,7 @@ ROUTES_REQUIRING_TOKEN = [
     {"path": "/collections/{collectionId}/items/{itemId}", "method": "GET"},
     {"path": "/queryables", "method": "GET"},
     {"path": "/collections/{collectionId}/queryables", "method": "GET"},
-    {"path": "/ping", "method": "GET"},
+    {"path": "/_mgmt/ping", "method": "GET"},
 ]
 
 settings = SqlalchemySettings()
