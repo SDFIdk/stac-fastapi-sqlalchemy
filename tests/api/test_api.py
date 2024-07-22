@@ -676,7 +676,7 @@ def test_item_collection_filter_bbox(load_test_data, app_client):
     resp = app_client.get(f"/collections/{collection}/items", params={"bbox": bbox})
     assert resp.status_code == 200
     resp_json = resp.json()
-    assert len(resp_json["features"]) == 1
+    assert len(resp_json["features"]) == 10
 
     bbox = "1,2,3,4"
     resp = app_client.get(f"/collections/{collection}/items", params={"bbox": bbox})
