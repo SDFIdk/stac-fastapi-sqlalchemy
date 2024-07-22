@@ -2,7 +2,7 @@ import json
 import orjson
 import os
 import time
-import uuid
+# import uuid
 
 # from copy import deepcopy
 from datetime import datetime, timedelta, timezone
@@ -14,7 +14,7 @@ import pytest
 import pystac
 from pydantic.datetime_parse import parse_datetime
 from pystac.utils import datetime_to_str
-from shapely.geometry import Polygon
+# from shapely.geometry import Polygon
 from stac_fastapi.types.core import LandingPageMixin
 from stac_fastapi.types.rfc3339 import rfc3339_str_to_datetime
 from stac_pydantic.shared import DATETIME_RFC339
@@ -407,7 +407,7 @@ def test_item_search_by_id_post(app_client, load_test_data):
     """Test POST search by item id (core)"""
     ids = [
         "2021_85_47_5_0032_00000135",
-        "2021_84_41_3_0019_00105137",
+        "2021_84_41_4_0019_00105137",
         "2021_84_41_3_0019_00105137",
     ]
     # for id in ids:
@@ -990,7 +990,7 @@ def test_field_extension_exclude_default_includes(app_client, load_test_data):
     assert "geometry" not in resp_json["features"][0]
 
 
-#def test_search_intersects_and_bbox(app_client):
+# def test_search_intersects_and_bbox(app_client):
 def test_search_intersects_and_bbox(load_test_data, app_client):
     """Test POST search intersects and bbox are mutually exclusive (core)"""
     item = load_test_data("test_item.json")
