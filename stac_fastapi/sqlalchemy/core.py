@@ -1249,12 +1249,8 @@ class CoreFiltersClient(BaseFiltersClient):
     session: Session = attr.ib(default=attr.Factory(Session.create_from_env))
 
     def validate_collection(self, value):
-        # client = CoreCrudClient(session=self.session, collection_table=database.Collection)
         with self.session.reader.context_session() as session:
-            try:
-                CoreCrudClient._lookup_id(value, database.Collection, session)
-            except:
-                raise ValueError(f"Collection '{value}' doesn't exist")
+            CoreCrudClient._lookup_id(value, database.Collection, session)
 
     def get_queryables(
         self, collection_id: Optional[str] = None, **kwargs

@@ -59,7 +59,48 @@ def test_collection_not_found(app_client):
     """Test read a collection which does not exist"""
     resp = app_client.get("/collections/does-not-exist")
     assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Collection does-not-exist not found"
 
+def test_collection_items_collectionid_not_found(app_client, load_test_data):
+    """Test read an item with a collectionId that does not exist"""
+    test_collection = load_test_data("test_collection.json")
+    test_item = load_test_data("test_item.json")
+
+    # Test that we get a 404 if the collectionId does not exist
+    resp = app_client.get(f"/collections/does-not-exist/items")
+    assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Collection does-not-exist not found"
+
+    # Test that we get a 404 if the itemId does not exist but the collectionId does
+    resp = app_client.get(f"/collections/{test_collection['id']}/items/does-not-exist")
+    assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Item does-not-exist not found"
+
+    # Test that we get a 404 if the collectionId does not exist but the itemId does
+    resp = app_client.get(f"/collections/does-not-exist/items/{test_item['id']}")
+    assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Item 2021_82_20_1_0001_00005355 not found"
+
+    # Test that we get a 404 if neither the itemId or the collectionId exists
+    resp = app_client.get(f"/collections/does-not-exist/items/also-does-not-exist")
+    assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Item also-does-not-exist not found"
+
+    ## finally check that we get the item if both exists
+    resp = app_client.get(
+        f"/collections/{test_collection['id']}/items/{test_item['id']}"
+    )
+    assert resp.status_code == 200
 
 def test_returns_valid_collection(app_client, load_test_data):
     """Test validates fetched collection with jsonschema"""
