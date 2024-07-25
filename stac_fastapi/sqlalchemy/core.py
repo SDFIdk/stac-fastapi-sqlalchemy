@@ -782,10 +782,25 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                             f"Invalid parameters provided, if using + notation (+{sort[1:]}), remember to URL encode the request"
                         ],
                     )
-                sort_param.append(
+                # sort_param.append(
+                #     {
+                #         "field": sort[1:],
+                #         "direction": "asc" if sort[0] == "+" else "desc",
+                #     }
+                # )
+                # The code can not handle that the input parameter starts with no prefix value
+                if sort[0] in ("+", "-"):
+                    sort_param.append(
+                        {
+                            "field": sort[1:],
+                            "direction": "asc" if sort[0] == "+" else "desc",
+                        }
+                    )
+                else:
+                    sort_param.append(
                     {
-                        "field": sort[1:],
-                        "direction": "asc" if sort[0] == "+" else "desc",
+                        "field": sort[0:],
+                        "direction": "asc",
                     }
                 )
             base_args["sortby"] = sort_param

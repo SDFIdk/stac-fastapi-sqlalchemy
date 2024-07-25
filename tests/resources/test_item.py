@@ -638,6 +638,38 @@ def test_item_search_sort_get(app_client, load_test_data):
     assert resp_json["features"][1]["id"] == second_item["id"]
 
 
+def test_item_search_sort_get_no_prefix(app_client, load_test_data):
+    """Test GET search with sorting with no default prefix(sort extension)"""
+    first_item = load_test_data("test_item.json")
+
+    params = {"collections": [first_item["collection"]], "sortby": "datetime"}
+    resp = app_client.get("/search", params=params)
+    assert resp.status_code == 200
+    resp_json = resp.json()
+    assert resp_json["features"][0]["id"] == "2021_85_45_1_0045_00000003"
+    assert resp_json["features"][1]["id"] == "2021_85_45_2_0045_00000003"
+
+
+def test_item_search_sort_datetime_asc_id_desc_get(app_client, load_test_data):
+    """Test GET search with sorting (sort extension)"""
+    first_item = load_test_data("test_item.json")
+
+    params = {"collections": [first_item["collection"]], "sortby": "+datetime,-id"}
+    resp = app_client.get("/search", params=params)
+
+    assert resp.status_code == 200
+    resp_json = resp.json()
+    assert len(resp_json["features"]) == 10
+
+    id1 = resp_json["features"][0]["id"]
+    id10 = resp_json["features"][9]["id"]
+    assert id1 > id10
+
+    date1 = resp_json["features"][0]["properties"]["datetime"]
+    date10 = resp_json["features"][9]["properties"]["datetime"]
+    assert date1 < date10
+
+
 def test_item_search_post_without_collection(app_client, load_test_data):
     """Test POST search without specifying a collection"""
     test_item = load_test_data("test_item.json")
