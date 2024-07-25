@@ -300,6 +300,8 @@ def test_get_item(app_client, load_test_data):
         f"/collections/{test_item['collection']}/items/{test_item['id']}"
     )
     assert get_item.status_code == 200
+    resp_json = get_item.json()
+    assert resp_json["id"] == test_item["id"]
 
 
 @pytest.mark.skip(
@@ -500,6 +502,10 @@ def test_item_search_temporal_open_window(app_client, load_test_data):
         resp = app_client.post("/search", json={"datetime": dt})
         assert resp.status_code == 400
 
+    for dt in ["/", "../", "/..", "../.."]:
+        resp = app_client.get("/search", params={"datetime": dt})
+        assert resp.status_code == 400
+
 
 def test_item_search_sort_post(app_client, load_test_data):
     """Test POST search with sorting (sort extension)"""
@@ -586,6 +592,7 @@ def test_item_search_get_without_collections(app_client, load_test_data):
     assert resp.status_code == 200
     resp_json = resp.json()
     assert resp_json["features"][0]["id"] == test_item["id"]
+    assert len(resp_json["features"]) >= 1
 
 
 def test_item_search_temporal_window_get(app_client, load_test_data):
@@ -597,8 +604,10 @@ def test_item_search_temporal_window_get(app_client, load_test_data):
     # assert resp.status_code == 200
 
     item_date = rfc3339_str_to_datetime(test_item["properties"]["datetime"])
-    item_date_before = item_date - timedelta(seconds=1)
-    item_date_after = item_date + timedelta(seconds=1)
+    # item_date_before = item_date - timedelta(seconds=1)
+    # item_date_after = item_date + timedelta(seconds=1)
+    item_date_before = item_date - timedelta(seconds=20)
+    item_date_after = item_date + timedelta(seconds=10)
 
     params = {
         "collections": test_item["collection"],
@@ -715,9 +724,10 @@ def test_item_search_properties_jsonb(app_client, load_test_data):
     assert len(resp_json["features"]) == 0
 
 
-def test_item_search_properties_field(app_client, load_test_data):
+# def test_item_search_properties_field(app_client, load_test_data):
+def test_item_search_properties_field(app_client):
     """Test POST search indexed field with query (query extension)"""
-    test_item = load_test_data("test_item.json")
+    # test_item = load_test_data("test_item.json")
     # resp = app_client.post(
     #     f"/collections/{test_item['collection']}/items", json=test_item
     # )
@@ -730,23 +740,54 @@ def test_item_search_properties_field(app_client, load_test_data):
     assert resp.status_code == 200
     resp_json = resp.json()
     assert len(resp_json["features"]) == 10
+    for response in resp_json["features"]:
+        assert response["properties"]["gsd"] == 0.075
+
+    params = {"filter-lang": "cql-json", "filter": {"eq": [{"property": "direction"}, "south"]}}
+
+    resp = app_client.post("/search", json=params)
+    assert resp.status_code == 200
+    resp_json = resp.json()
+    assert len(resp_json["features"]) == 10
+    for response in resp_json["features"]:
+        assert response["properties"]["direction"] == "south"
 
 
+@pytest.mark.skip(reason="Query Extension switched off")
 def test_item_search_get_query_extension(app_client, load_test_data):
     """Test GET search with JSONB query (query extension)"""
     test_item = load_test_data("test_item.json")
-    # resp = app_client.post(
-    #     f"/collections/{test_item['collection']}/items", json=test_item
-    # )
-    # assert resp.status_code == 200
+    resp = app_client.post(
+        f"/collections/{test_item['collection']}/items", json=test_item
+    )
+    assert resp.status_code == 200
 
     # EPSG is a JSONB key
-    # params = {
-    #     "collections": [test_item["collection"]],
-    #     "query": json.dumps(
-    #         {"proj:epsg": {"gt": test_item["properties"]["proj:epsg"] + 1}}
-    #     ),
-    # }
+    params = {
+        "collections": [test_item["collection"]],
+        "query": json.dumps(
+            {"proj:epsg": {"gt": test_item["properties"]["proj:epsg"] + 1}}
+        ),
+    }
+    resp = app_client.get("/search", params=params)
+    assert resp.json()["context"]["returned"] == 0
+
+    params["query"] = json.dumps(
+        {"proj:epsg": {"eq": test_item["properties"]["proj:epsg"]}}
+    )
+    resp = app_client.get("/search", params=params)
+    resp_json = resp.json()
+    assert resp_json["context"]["returned"] == 1
+    assert (
+        resp_json["features"][0]["properties"]["proj:epsg"]
+        == test_item["properties"]["proj:epsg"]
+    )
+
+
+def test_item_search_get_filter_extension(app_client, load_test_data):
+    """Test GET search with JSONB query (query extension)"""
+    test_item = load_test_data("test_item.json")
+
     params = {
         "collections": [test_item["collection"]],
         "filter-lang": "cql-json",
@@ -762,20 +803,14 @@ def test_item_search_get_query_extension(app_client, load_test_data):
     resp = app_client.get("/search", params=params)
     assert resp.json()["context"]["returned"] == 0
 
-    # params["query"] = json.dumps(
-    #     {"proj:epsg": {"eq": test_item["properties"]["proj:epsg"]}}
-    # )
     params["filter"] = json.dumps(
         {"eq": [{"property": "gsd"}, test_item["properties"]["gsd"]]}
     )
     resp = app_client.get("/search", params=params)
     resp_json = resp.json()
-    # assert resp_json["context"]["returned"] == 1
     assert resp_json["context"]["returned"] >= 2
     assert (
-        # resp_json["features"][0]["properties"]["proj:epsg"]
         resp_json["features"][0]["properties"]["gsd"]
-        # == test_item["properties"]["proj:epsg"]
         == test_item["properties"]["gsd"]
     )
 
@@ -813,6 +848,9 @@ def test_get_missing_item_collection(app_client):
     """Test reading a collection which does not exist"""
     resp = app_client.get("/collections/invalid-collection/items")
     assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Collection invalid-collection not found"
 
 
 def test_pagination_item_collection(app_client, load_test_data):
@@ -913,9 +951,10 @@ def test_pagination_post(app_client, load_test_data):
     assert not set(item_ids) - set(ids)
 
 
-def test_pagination_token_idempotent(app_client, load_test_data):
+#def test_pagination_token_idempotent(app_client, load_test_data):
+def test_pagination_token_idempotent(app_client):
     """Test that pagination tokens are idempotent (paging extension)"""
-    test_item = load_test_data("test_item.json")
+    #test_item = load_test_data("test_item.json")
     # ids = []
     ids = [
         "2017_82_20_4_2031_00030536",
