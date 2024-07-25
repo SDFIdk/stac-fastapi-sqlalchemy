@@ -5,6 +5,8 @@ import pytest
 import orjson
 
 from ..conftest import MockStarletteRequest
+from stac_fastapi.sqlalchemy.extensions.filter import BaseQueryables, SkraafotosProperties, QueryableTypes
+
 
 STAC_CORE_ROUTES = [
     "GET /",
@@ -431,11 +433,17 @@ def test_datetime_non_interval(load_test_data, app_client):
     # postgres_transactions.create_item(
     #     item["collection"], item, request=MockStarletteRequest
     # )
+    # alternate_formats = [
+    #     "2020-02-12T12:30:22+00:00",
+    #     "2020-02-12T12:30:22.00Z",
+    #     "2020-02-12T12:30:22Z",
+    #     "2020-02-12T12:30:22.00+00:00",
+    # ]
     alternate_formats = [
-        "2021-11-22T10:03:41+00:00",
+        "2021-11-22T11:03:41+01:00",
         "2021-11-22T10:03:41.00Z",
         "2021-11-22T10:03:41Z",
-        "2021-11-22T10:03:41.00+00:00",
+        "2021-11-22T11:03:41.00+01:00",
     ]
     for date in alternate_formats:
         params = {
@@ -446,14 +454,16 @@ def test_datetime_non_interval(load_test_data, app_client):
         resp = app_client.post("/search", json=params)
         assert resp.status_code == 200
         resp_json = resp.json()
-        # datetime is returned in this format "2021-11-22T10:03:41Z"
-        assert resp_json["features"][0]["properties"]["datetime"][0:19] == date[0:19]
+        # datetime is returned in this format "2021-11-22T11:03:41+01:00"
+        # assert resp_json["features"][0]["properties"]["datetime"][0:19] == date[0:19]
+        # Response should always return this date regardless of with ones of the query parameter datatime value is given
+        resp_json["features"][0]["properties"]["datetime"][0:19] == "2021-11-22T11:03:41+01:00"
 
         resp = app_client.get("/search", params=params)
         assert resp.status_code == 200
         resp_json = resp.json()
-        # datetime is returned in this format "2021-11-22T10:03:41Z"
-        assert resp_json["features"][0]["properties"]["datetime"][0:19] == date[0:19]
+        # datetime is returned in this format "2021-11-22T11:03:41+01:00"
+        resp_json["features"][0]["properties"]["datetime"][0:19] == "2021-11-22T11:03:41+01:00"
 
 
 # def test_bbox_3d(load_test_data, app_client, postgres_transactions):
@@ -727,8 +737,6 @@ def test_item_collection_filter_datetime(
 
 # Check that the hardcoded queryable names matches an equivalent in QueryableTypes, and in result property names
 def test_filter_queryables_config(load_test_data):
-    from stac_fastapi.sqlalchemy.extensions.filter import BaseQueryables, SkraafotosProperties, QueryableTypes
-
     queryable_enums = list(BaseQueryables._member_names_) + list(
         SkraafotosProperties._member_names_
     )

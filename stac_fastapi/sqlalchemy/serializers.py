@@ -1,14 +1,13 @@
 """Serializers."""
 import abc
 import json
-from datetime import timedelta, timezone
 from typing import Any, Dict, TypedDict
 import urllib.parse
 
 import attr
 import geoalchemy2 as ga
 
-# from pystac.utils import datetime_to_str
+from pystac.utils import datetime_to_str
 
 from stac_fastapi.sqlalchemy.config import SqlalchemySettings
 
@@ -20,12 +19,8 @@ from stac_fastapi.types.rfc3339 import now_to_rfc3339_str, rfc3339_str_to_dateti
 from stac_fastapi.sqlalchemy.models import database
 from stac_fastapi.sqlalchemy.types.links import ApiTokenHrefBuilder
 
-from stac_pydantic.shared import DATETIME_RFC339
 
-DATE_RFC339 = "%Y-%m-%d"
-UTC_TIMEZONE = timezone(timedelta(0))
 settings = SqlalchemySettings()
-
 
 def _add_query_params(url, params):
     """Combines URL with params"""
@@ -87,10 +82,7 @@ class ItemSerializer(Serializer):
             # Use getattr to accommodate extension namespaces
             field_value = getattr(db_model, field.split(":")[-1])
             if field == "datetime":
-                # field_value = datetime_to_str(field_value)
-                field_value = field_value.astimezone(timezone(timedelta(0))).strftime(
-                    DATETIME_RFC339
-                )
+                field_value = datetime_to_str(field_value)
             properties[field] = field_value
         item_id = db_model.id
         collection_id = db_model.collection_id
@@ -213,9 +205,7 @@ class ItemSerializer(Serializer):
             "camera_id": instrument_id,
             "focal_length": db_model.focal_length,
             "pixel_spacing": [db_model.sensor_pixel_size, db_model.sensor_pixel_size],
-            "calibration_date": db_model.calibration_date.strftime(DATE_RFC339)
-            if db_model.calibration_date
-            else None,
+            "calibration_date": db_model.calibration_date,
             "principal_point_offset": [
                 db_model.principal_point_x,
                 db_model.principal_point_y,

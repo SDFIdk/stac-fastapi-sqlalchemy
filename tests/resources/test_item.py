@@ -17,7 +17,6 @@ from pystac.utils import datetime_to_str
 # from shapely.geometry import Polygon
 from stac_fastapi.types.core import LandingPageMixin
 from stac_fastapi.types.rfc3339 import rfc3339_str_to_datetime
-from stac_pydantic.shared import DATETIME_RFC339
 
 from stac_fastapi.sqlalchemy.core import CoreCrudClient
 
@@ -452,15 +451,13 @@ def test_item_search_temporal_query_post(app_client, load_test_data):
     # )
     # assert resp.status_code == 200
 
-    # item_date = rfc3339_str_to_datetime(test_item["properties"]["datetime"])
-    item_date = datetime.strptime(test_item["properties"]["datetime"], DATETIME_RFC339)
+    item_date = rfc3339_str_to_datetime(test_item["properties"]["datetime"])
     item_date = item_date + timedelta(seconds=1)
 
     params = {
         "collections": [test_item["collection"]],
         "intersects": test_item["geometry"],
-        # "datetime": f"../{datetime_to_str(item_date)}",
-        "datetime": f"../{item_date.strftime(DATETIME_RFC339)}",
+        "datetime": f"../{datetime_to_str(item_date)}",
     }
     resp = app_client.post("/search", json=params)
     resp_json = resp.json()
@@ -611,6 +608,20 @@ def test_item_search_temporal_window_get(app_client, load_test_data):
     resp = app_client.get("/search", params=params)
     resp_json = resp.json()
     assert resp_json["features"][0]["id"] == test_item["id"]
+
+    assert any(
+        test_item["id"] == f["id"] for f in resp_json["features"]
+    ), "test item should be returned within interval"
+
+    assert all(
+        datetime_to_str(item_date_after) >= f["properties"]["datetime"]
+        for f in resp_json["features"]
+    ), "Item with datetime outside (greater than) filter interval"
+
+    assert all(
+        datetime_to_str(item_date_before) <= f["properties"]["datetime"]
+        for f in resp_json["features"]
+    ), "Item with datetime outside (less than) filter interval"
 
 
 def test_item_search_sort_get(app_client, load_test_data):
