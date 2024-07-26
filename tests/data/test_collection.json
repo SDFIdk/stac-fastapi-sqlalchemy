@@ -47,22 +47,22 @@
         {
             "rel": "self",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2021"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021"
         },
         {
             "rel": "parent",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
         },
         {
             "rel": "items",
             "type": "application/geo+json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2021/items"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021/items"
         },
         {
             "rel": "root",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
         },
         {
             "rel": "license",

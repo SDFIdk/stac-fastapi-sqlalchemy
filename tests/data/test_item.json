@@ -123,22 +123,22 @@
         {
             "rel": "self",
             "type": "application/geo+json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2021/items/2021_82_20_1_0001_00005355"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021/items/2021_82_20_1_0001_00005355"
         },
         {
             "rel": "parent",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2021"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021"
         },
         {
             "rel": "collection",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/collections/skraafotos2021"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021"
         },
         {
             "rel": "root",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v1.0/"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
         },
         {
             "rel": "license",
