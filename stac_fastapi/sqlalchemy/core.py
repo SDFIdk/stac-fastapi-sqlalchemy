@@ -11,8 +11,9 @@ import attr
 import geoalchemy2 as ga
 import sqlalchemy as sa
 import stac_pydantic
-from fastapi import HTTPException
+#from fastapi import HTTPException
 #from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from stac_fastapi.api.models import GeoJSONResponse
 from pydantic import ValidationError
 from shapely.geometry import Polygon as ShapelyPolygon
@@ -47,7 +48,11 @@ logger = logging.getLogger(__name__)
 NumType = Union[float, int]
 
 def monkeypatch_parse_geometry(geom):
-    wkt = shape(geom).wkt
+    try:
+        wkt = shape(geom).wkt
+    except Exception as e:
+        raise RequestValidationError(e)
+    
     crs = geom["crs"] if "crs" in geom.keys() else 4326
     if crs == 4326:
         return func.ST_GeomFromText(wkt, 4326)
@@ -189,6 +194,7 @@ def validate_filter_operations(expr, valid_ops):
             op = "lte"
         if op not in valid_ops:
             raise ValueError(f"Unsupported operation: {expr}")
+        
         
 @attr.s
 class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
@@ -367,10 +373,10 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 if self.get_extension("CrsExtension").is_crs_supported(crs):
                     output_srid = self.get_extension("CrsExtension").epsg_from_crs(crs)
                 else:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="CRS provided for argument crs is invalid, valid options are: "
-                        + ",".join(self.get_extension("CrsExtension").crs),
+                    raise RequestValidationError(
+                        ValueError(
+                            "CRS provided for argument crs is invalid, valid options are: " + ", ".join(self.get_extension("CrsExtension").crs)
+                        )
                     )
             else:
                 output_srid = self.storage_srid
@@ -380,10 +386,10 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 if self.get_extension("CrsExtension").is_crs_supported(bbox_crs):
                     bbox_srid = self.get_extension("CrsExtension").epsg_from_crs(bbox_crs)
                 else:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="CRS provided for argument bbox_crs is invalid, valid options are: "
-                        + ",".join(self.get_extension("CrsExtension").crs),
+                    raise RequestValidationError(
+                        ValueError(
+                            "CRS provided for argument bbox_crs is invalid, valid options are: " + ", ".join(self.get_extension("CrsExtension").crs)
+                        )
                     )
             else:
                 bbox_srid = self.storage_srid
@@ -393,18 +399,19 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 if self.get_extension("CrsExtension").is_crs_supported(filter_crs):
                     filter_srid = self.get_extension("CrsExtension").epsg_from_crs(filter_crs)
                 else:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="CRS provided for argument filter_crs is invalid, valid options are: "
-                        + ",".join(self.get_extension("CrsExtension").crs),
+                    raise RequestValidationError(
+                        ValueError(
+                            "CRS provided for argument filter_crs is invalid, valid options are: " + ", ".join(self.get_extension("CrsExtension").crs)
+                        )
                     )
             else:
                 filter_srid = self.storage_srid
             
             if filter_lang and self.extension_is_enabled("FilterExtension") and filter_lang != "cql-json":
-                raise HTTPException(
-                    status_code=400,
-                    detail="filter-lang is not a supported filter-language. Currently supported languages are: cql-json"
+                raise RequestValidationError(
+                    ValueError(
+                        "filter-lang is not a supported filter-language. Currently supported languages are: cql-json"
+                    )
                 )
 
             # Transform footprint and bbox if necessary
@@ -475,26 +482,23 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
             if filter:
                 # Deserialize input filter parameter to Python object
-                filter = json.loads(filter)
-
+                try:
+                    filter = json.loads(filter)
+                except Exception as e:
+                    raise RequestValidationError(e)
+                
                 # add filter-crs to filter geomtery
                 add_filter_crs(filter, filter_srid)
 
                 # monkey patch parse_geometry from pygeofilter
                 pygeofilter.backends.sqlalchemy.filters.parse_geometry = monkeypatch_parse_geometry
-
+            
                 try: 
                     ast = pygeofilter.parsers.cql_json.parse(filter)
-                except Exception as e: 
-                    raise HTTPException(
-                        status_code=400,
-                        detail="The input cql-json could not be parsed: " + str(e)
-                        )
+                except Exception as e:
+                    raise RequestValidationError(e)
                 if ast is None:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="The input cql-json could not be parsed" 
-                    )
+                    raise RequestValidationError(ValueError("The input cql-json could not be parsed"))
                 
                 (base_queryables, collection_queryables,) = Queryables.get_queryable_properties_intersection()
                 valid_fields = base_queryables + collection_queryables
@@ -511,17 +515,12 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 try:
                     validate_filter_fields(ast, valid_fields)
                 except ValueError as e:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Invalid field used in filter: " + str(e),
-                    )
+                    raise RequestValidationError(e)
+                
                 try:
                     validate_filter_operations(ast, valid_operations)
                 except ValueError as e:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Invalid operation used in filter: " + str(e),
-                    )
+                    raise RequestValidationError(e)
 
                 sa_expr = to_filter(ast, self.FIELD_MAPPING)
                 
@@ -691,11 +690,11 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             if self.get_extension("CrsExtension").is_crs_supported(crs):
                 output_srid = self.get_extension("CrsExtension").epsg_from_crs(crs)
             else:
-                raise HTTPException(
-                    status_code=400,
-                    detail="CRS provided for argument crs is invalid, valid options are: "
-                    + ",".join(self.get_extension("CrsExtension").crs),
-                )
+                raise RequestValidationError(
+                    ValueError(
+                        "CRS provided for argument crs is invalid, valid options are: " + ", ".join(self.get_extension("CrsExtension").crs)
+                        )
+                    )
         else:
             output_srid = self.storage_srid
 
@@ -749,6 +748,11 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
     ) -> ItemCollection:
         """GET search catalog."""
         # Parse request parameters
+        try:
+            filter_test = json.loads(filter) if filter else filter
+        except Exception as e:
+            raise RequestValidationError(e)
+        
         base_args = {
             "collections": collections,
             "ids": ids,
@@ -757,7 +761,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             "limit": limit,
             #"token": token,
             "pt": pt,
-            "filter": json.loads(filter) if filter else filter,
+            "filter": filter_test,
             "filter-lang": filter_lang,
             "filter-crs": filter_crs,
             #"query": json.loads(unquote_plus(query)) if query else query,
@@ -768,7 +772,10 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             base_args["datetime"] = datetime
 
         if intersects:
-            base_args["intersects"] = json.loads(unquote_plus(intersects))
+            try:
+                base_args["intersects"] = json.loads(unquote_plus(intersects))
+            except Exception as e:
+                raise RequestValidationError(e)
 
         # TODO: Missing implementation from old code
         if sortby:
@@ -776,12 +783,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             sort_param = []
             for sort in sortby:
                 if (sort[0] == " "):  # https://www.w3.org/Addressing/URL/uri-spec.html non-urlencoded "+" signs turn into " ".
-                    raise HTTPException(
-                        status_code=400,
-                        detail=[
-                            f"Invalid parameters provided, if using + notation (+{sort[1:]}), remember to URL encode the request"
-                        ],
-                    )
+                    raise RequestValidationError(ValueError(f"Invalid parameters provided, if using + notation (+{sort[1:]}), remember to URL encode the request"))
                 # sort_param.append(
                 #     {
                 #         "field": sort[1:],
@@ -823,7 +825,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         # except ValidationError:
         except ValidationError as e:
             #raise HTTPException(status_code=400, detail="Invalid parameters provided")
-            raise HTTPException(status_code=400, detail=["Invalid parameters provided"] + str(e).split("\n"))
+            raise RequestValidationError(e)
         resp = self.post_search(search_request, False, request=kwargs["request"])
         
         # Pagination
@@ -989,19 +991,13 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
                     # monkey patch parse_geometry from pygeofilter
                     pygeofilter.backends.sqlalchemy.filters.parse_geometry = monkeypatch_parse_geometry
-
+                    
                     try: 
                         ast = pygeofilter.parsers.cql_json.parse(search_request.filter)
-                    except Exception as e: 
-                        raise HTTPException(
-                            status_code=400,
-                            detail="The input cql-json could not be parsed: " + str(e)
-                            )
+                    except Exception as e:
+                        raise RequestValidationError(e)
                     if ast is None:
-                        raise HTTPException(
-                            status_code=400,
-                            detail="The input cql-json could not be parsed" 
-                        )
+                        raise RequestValidationError(ValueError("The input cql-json could not be parsed"))
                     
                     if search_request.collections:
                         (base_queryables, collection_queryables,) = Queryables.get_queryable_properties_intersection(search_request.collections)
@@ -1018,21 +1014,16 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         # **pygeofilter.parsers.cql_json.parser.ARRAY_PREDICATES_MAP,
                         **pygeofilter.parsers.cql_json.parser.ARITHMETIC_MAP,
                     }
-
+                    
                     try:
                         validate_filter_fields(ast, valid_fields)
                     except ValueError as e:
-                        raise HTTPException(
-                            status_code=400,
-                            detail="Invalid field used in filter: " + str(e),
-                        )
+                        raise RequestValidationError(e)
+                    
                     try:
                         validate_filter_operations(ast, valid_operations)
                     except ValueError as e:
-                        raise HTTPException(
-                            status_code=400,
-                            detail="Invalid operation used in filter: " + str(e),
-                        )
+                        raise RequestValidationError(e)
 
                     sa_expr = to_filter(ast, self.FIELD_MAPPING)
                     
@@ -1284,13 +1275,7 @@ class CoreFiltersClient(BaseFiltersClient):
         base_url = str(kwargs["request"].base_url)
         if "collection_id" in str(kwargs["request"].path_params):
             collection_id = str(kwargs["request"].path_params["collection_id"])
-            try:
-                self.validate_collection(collection_id)
-            except ValueError as e:
-                raise HTTPException(
-                    status_code=404,
-                    detail=["Not found"] + str(e).split("\n"),
-                )
+            self.validate_collection(collection_id)
 
         # Check that collection exists
 
