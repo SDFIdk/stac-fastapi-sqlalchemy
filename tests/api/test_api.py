@@ -70,7 +70,7 @@ def test_landing_page_stac_extensions(app_client):
     resp = app_client.get("/")
     assert resp.status_code == 200
     resp_json = resp.json()
-    assert not resp_json["stac_extensions"]
+    assert "https://raw.githubusercontent.com/stac-api-extensions/context/v1.0.0-rc.2/json-schema/schema.json" == resp_json["stac_extensions"]
 
 
 @pytest.mark.skip(reason="Database is readonly")
