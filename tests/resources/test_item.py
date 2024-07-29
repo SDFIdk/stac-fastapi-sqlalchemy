@@ -13,11 +13,10 @@ from urllib.parse import parse_qs, urlparse, urlsplit
 import pytest
 import pystac
 from pydantic.datetime_parse import parse_datetime
-from pystac.utils import datetime_to_str
 from shapely.geometry import shape
 # from shapely.geometry import Polygon
 from stac_fastapi.types.core import LandingPageMixin
-from stac_fastapi.types.rfc3339 import rfc3339_str_to_datetime
+from stac_fastapi.types.rfc3339 import datetime_to_str, rfc3339_str_to_datetime
 
 from stac_fastapi.sqlalchemy.core import CoreCrudClient
 
