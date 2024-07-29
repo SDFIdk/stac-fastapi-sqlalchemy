@@ -22,6 +22,7 @@ class SqlalchemySettings(ApiSettings):
     postgres_host_writer: str
     postgres_port: str
     postgres_dbname: str
+    connect_args={"options": "-c statement_timeout=10000"}
 
     cogtiler_basepath: str
 

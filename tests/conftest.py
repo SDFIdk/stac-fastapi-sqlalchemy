@@ -88,6 +88,7 @@ def db_session() -> Session:
     return Session(
         reader_conn_string=settings.reader_connection_string,
         writer_conn_string=settings.writer_connection_string,
+        connect_args=settings.connect_args
     )
 
 

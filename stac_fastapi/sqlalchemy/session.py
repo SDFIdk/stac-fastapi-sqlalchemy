@@ -85,7 +85,7 @@ class Session:
         return cls(
             reader_conn_string=os.environ["READER_CONN_STRING"],
             writer_conn_string=os.environ["WRITER_CONN_STRING"],
-            connect_args=os.environ.get("CONNECT_ARGS"),
+            connect_args=os.environ["CONNECT_ARGS"],
         )
 
     @classmethod

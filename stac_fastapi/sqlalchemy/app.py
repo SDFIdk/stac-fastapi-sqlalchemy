@@ -61,8 +61,7 @@ ROUTES_REQUIRING_TOKEN = [
     {"path": "/_mgmt/ping", "method": "GET"},
 ]
 
-# settings = SqlalchemySettings()
-settings = SqlalchemySettings(connect_args={"options": "-c statement_timeout=10000"})
+settings = SqlalchemySettings()
 session = Session.create_from_settings(settings)
 extensions = [
     # TransactionExtension(client=TransactionsClient(session=session), settings=settings),
