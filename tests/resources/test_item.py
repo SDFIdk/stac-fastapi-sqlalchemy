@@ -501,10 +501,14 @@ def test_item_search_temporal_open_window(app_client, load_test_data):
     for dt in ["/", "../", "/..", "../.."]:
         resp = app_client.post("/search", json={"datetime": dt})
         assert resp.status_code == 400
+        resp_json = resp.json()
+        assert resp_json["detail"] == "Double open-ended intervals are not allowed."
 
     for dt in ["/", "../", "/..", "../.."]:
         resp = app_client.get("/search", params={"datetime": dt})
         assert resp.status_code == 400
+        resp_json = resp.json()
+        assert resp_json["detail"] == "Double open-ended intervals are not allowed."
 
 
 def test_item_search_sort_post(app_client, load_test_data):

@@ -234,9 +234,15 @@ def test_app_filter_extension_limit_eq0(app_client):
     
     resp = app_client.get("/search", params=params)
     assert resp.status_code == 400
-
+    resp_json = resp.json()
+    assert resp_json["code"] == "RequestValidationError"
+    assert resp_json["description"] == "1 validation error for SearchPostRequest\nlimit\n  ensure this value is greater than 1 (type=value_error.number.not_gt; limit_value=1)"
+    
     resp = app_client.post("/search", json=params)
     assert resp.status_code == 400
+    resp_json = resp.json()
+    assert resp_json["code"] == "RequestValidationError"
+    assert resp_json["description"] == "[{'loc': ('body', 'limit'), 'msg': 'ensure this value is greater than 1', 'type': 'value_error.number.not_gt', 'ctx': {'limit_value': 1}}]"
 
 
 @pytest.mark.skip(reason="Query Extension switched off")
@@ -258,10 +264,16 @@ def test_app_filter_extension_limit_lt0(app_client):
 
     resp = app_client.get("/search", params=params)
     assert resp.status_code == 400
-
+    resp_json = resp.json()
+    assert resp_json["code"] == "RequestValidationError"
+    assert resp_json["description"] == "1 validation error for SearchPostRequest\nlimit\n  ensure this value is greater than 1 (type=value_error.number.not_gt; limit_value=1)"
+    
     resp = app_client.post("/search", json=params)
     assert resp.status_code == 400
-
+    resp_json = resp.json()
+    assert resp_json["code"] == "RequestValidationError"
+    assert resp_json["description"] == "[{'loc': ('body', 'limit'), 'msg': 'ensure this value is greater than 1', 'type': 'value_error.number.not_gt', 'ctx': {'limit_value': 1}}]"
+    
 
 @pytest.mark.skip(reason="Query Extension switched off")
 def test_app_query_extension_limit_gt10000(
