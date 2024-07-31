@@ -5,6 +5,7 @@ from typing import Optional
 
 import geoalchemy2 as ga
 import sqlalchemy as sa
+from fastapi.exceptions import RequestValidationError
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import query_expression
@@ -134,10 +135,15 @@ class Item(BaseModel):  # type:ignore
             return getattr(cls, Queryables.get_queryable(field_name).name)
         except AttributeError:
             # Use a JSONB field
-            return cls.properties[(field_name)].cast(
-                #getattr(QueryableTypes, Queryables(field_name).name)
-                getattr(QueryableTypes, Queryables.get_queryable(field_name).name)
-            )
+            try: 
+                return cls.properties[(field_name)].cast(
+                    #getattr(QueryableTypes, Queryables(field_name).name)
+                    getattr(QueryableTypes, Queryables.get_queryable(field_name).name)
+                )
+            except AttributeError:
+                raise RequestValidationError(
+                   f"No matching field name: {field_name}"
+                )      
 
 
 class PaginationToken(BaseModel):  # type:ignore

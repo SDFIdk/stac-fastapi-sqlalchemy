@@ -364,6 +364,55 @@ def test_app_sort_extension( app_client):
     assert resp_json["features"][1]["id"] == "2021_85_45_2_0045_00000003"
 
 
+def test_app_sort_extension_invalid_sort(app_client):
+    get_params = {
+        "collections": "skraafotos2021",
+        "sortby": "+datetimer",
+    }
+
+    post_params = {
+        "collections": ["skraafotos2021"],
+        "sortby": [{"field": "datetimer", "direction": "asc"}],
+    }
+
+    resp = app_client.get("/search", params=get_params)
+    assert resp.status_code == 400
+    resp_json = resp.json()
+    assert resp_json["code"] == "RequestValidationError"
+    assert resp_json["description"] == "No matching field name: datetimer"
+
+    resp = app_client.post("/search", json=post_params)
+    assert resp.status_code == 400
+    resp_json = resp.json()
+    assert resp_json["code"] == "RequestValidationError"
+    assert resp_json["description"] == "No matching field name: datetimer"
+
+
+def test_app_sort_extension_url_encoded(app_client):
+    # https://www.w3.org/Addressing/URL/uri-spec.html non-urlencoded "+" signs turn into " ".
+    # but the app_client remembers to url encode the `+` so we put a space as the uri-spec would do it
+    get_params = {
+        "collections": "skraafotos2021",
+        "sortby": " datetime",
+    }
+
+    resp = app_client.get("/search", params=get_params)
+    assert resp.status_code == 400
+    resp_json = resp.json()
+    assert resp_json["code"] == "RequestValidationError"
+    assert resp_json["description"] == "Invalid parameters provided, if using + notation (+datetime), remember to URL encode the request"
+
+    get_params = {
+        "collections": "skraafotos2021",
+        "sortby": "%2Bdatetime",
+    }
+
+    resp = app_client.get("/search", params=get_params)
+    assert resp.status_code == 200
+    resp_json = resp.json()
+    assert resp_json["features"][0]["id"] == "2021_85_45_1_0045_00000003"
+    assert resp_json["features"][1]["id"] == "2021_85_45_2_0045_00000003"
+
 #def test_search_invalid_date(load_test_data, app_client, postgres_transactions):
 def test_search_invalid_date(load_test_data, app_client):
     item = load_test_data("test_item.json")
