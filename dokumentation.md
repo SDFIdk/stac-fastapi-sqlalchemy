@@ -491,7 +491,6 @@ _Parametre_
 | crs           | string    | Default: `http://www.opengis.net/def/crs/OGC/1.3/CRS84`, understøtter også `http://www.opengis.net/def/crs/EPSG/0/25832` <br>Angiver hvilket koordinatsystem geometrier i JSON response skal returneres i. Se [Crs Extension](#crs-extension).</br> |
 | limit         | integer   | Default: 10, maks: 1000 <br>Angiver maks antallet af `Item` objekter i JSON response som objektet indeholder (page size). Se [Context Extension](#context-extension).<br/> |
 | pt            | string    | Angiver en bestemt side, der skal fremsøges i forhold til paging. Se [Context Extension](#context-extension). |
-| ids           | \[string] | Array af `Item` ID'er. |
 | bbox          | \[number] | Array af fire tal. Returner kun items inden for denne box. Standard sorteringen korteste afstand mellem geometriens centoride og footprint af skråfotos. |
 | bbox-crs      | string    | Default: `http://www.opengis.net/def/crs/OGC/1.3/CRS84`, understøtter også `http://www.opengis.net/def/crs/EPSG/0/25832`. <br>Angiver hvilket koordinatsystem geometrier i `bbox` er angivet i.</br> |
 | datetime      | string    | Dato og tid formateret efter [RFC 3339, sektion 5.6](https://tools.ietf.org/html/rfc3339#section-5.6). Kan være en enkelt dato og tid eller intervaller separeret med `/`. Der kan bruges to punktummer `..` for et åbent dato- og tidsinterval. |
