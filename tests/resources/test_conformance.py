@@ -31,8 +31,12 @@ def test_landing_page_health(response):
 #  - Expected MIME/Media Type
 #  - Expected relative path
 link_tests = [
+    ("self", "application/json", "/"),
     ("root", "application/json", "/"),
+    ("data", "application/json", "/collections"),
     ("conformance", "application/json", "/conformance"),
+    ("search", "application/geo+json", "/search"),
+    ("http://www.opengis.net/def/rel/ogc/1.0/queryables", "application/schema+json", "/queryables"),
     ("service-doc", "text/html", "/api.html"),
     ("service-desc", "application/vnd.oai.openapi+json;version=3.0", "/api"),
 ]

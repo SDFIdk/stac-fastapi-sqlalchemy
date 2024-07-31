@@ -667,6 +667,18 @@ def test_app_search_response_duplicate_forwarded_headers(
                 assert link["href"].startswith("https://sdfi.dk/")
 
 
+def test_get_collections_content_type(app_client, load_test_data):
+    item = load_test_data("test_item.json")
+    resp = app_client.get(f"collections")
+    assert resp.headers["content-type"] == "application/json"
+
+
+def test_get_collection_content_type(app_client, load_test_data):
+    item = load_test_data("test_item.json")
+    resp = app_client.get(f"collections/{item['collection']}")
+    assert resp.headers["content-type"] == "application/json"
+
+
 def test_get_features_content_type(app_client, load_test_data):
     item = load_test_data("test_item.json")
     resp = app_client.get(f"collections/{item['collection']}/items")
