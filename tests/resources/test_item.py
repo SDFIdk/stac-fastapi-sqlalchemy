@@ -705,6 +705,7 @@ def test_item_search_post_without_collection(app_client, load_test_data):
     assert resp.status_code == 200
     resp_json = resp.json()
     assert resp_json["features"][0]["id"] == test_item["id"]
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
 
 @pytest.mark.skip(reason="proj:epsg is null")
@@ -807,6 +808,7 @@ def test_item_search_get_filter_extension(app_client, load_test_data):
         {"eq": [{"property": "gsd"}, test_item["properties"]["gsd"]]}
     )
     resp = app_client.get("/search", params=params)
+    assert resp.status_code == 200
     resp_json = resp.json()
     assert resp_json["context"]["returned"] >= 2
     assert (
@@ -1295,7 +1297,8 @@ def test_filter_crs_in_epsg25832_should_not_affect_bbox_in_epsg4326(app_client, 
     assert (
         resp_json["features"][0]["crs"]["properties"]["name"]
        == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-    )    
+    )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"    
 
 
 def test_crs_epsg25832(app_client):
@@ -1307,6 +1310,7 @@ def test_crs_epsg25832(app_client):
         resp_json["features"][0]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/EPSG/0/25832"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/EPSG/0/25832"
 
     body = {"crs": "http://www.opengis.net/def/crs/EPSG/0/25832"}
     resp = app_client.post("/search", json=body)
@@ -1315,6 +1319,7 @@ def test_crs_epsg25832(app_client):
         resp_json["features"][0]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/EPSG/0/25832"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/EPSG/0/25832"
 
 
 def test_crs_epsg4326(app_client):
@@ -1326,6 +1331,7 @@ def test_crs_epsg4326(app_client):
         resp_json["features"][0]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
     body = {"crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"}
     resp = app_client.post("/search", json=body)
@@ -1334,6 +1340,7 @@ def test_crs_epsg4326(app_client):
         resp_json["features"][0]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
 
 def test_filter_crs_epsg4326(app_client, load_test_data):
@@ -1358,6 +1365,7 @@ def test_filter_crs_epsg4326(app_client, load_test_data):
         resp_json["features"][0]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
 
 def test_filter_crs_wrong_filter_crs_epsg25832(app_client, load_test_data):
@@ -1375,6 +1383,7 @@ def test_filter_crs_wrong_filter_crs_epsg25832(app_client, load_test_data):
 
     assert resp.json()["context"]["returned"] == 0
     assert resp.json()["context"]["matched"] == 0
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
 
 def test_filter_crs_epsg25832(app_client, load_test_data):
@@ -1414,6 +1423,7 @@ def test_filter_crs_epsg25832(app_client, load_test_data):
         resp_json["features"][0]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/EPSG/0/25832"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/EPSG/0/25832"
 
 
 def test_filter_get_crs_epsg25832(app_client, load_test_data):
@@ -1455,6 +1465,7 @@ def test_filter_get_crs_epsg25832(app_client, load_test_data):
         resp_json["features"][0]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/EPSG/0/25832"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/EPSG/0/25832"
 
 
 def test_single_item_get_bbox_with_bbox_crs(app_client, load_test_data):
@@ -1473,6 +1484,7 @@ def test_single_item_get_bbox_with_bbox_crs(app_client, load_test_data):
     # TODO rewrite assertion. It could check if response json bbox actually is changed to the correct converted bbox
     assert resp_json["bbox"] != test_item["bbox"]
     assert resp_json["bbox"] == [491947.05803559424, 6186293.536697917, 494008.1595980942, 6187704.692947916]
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/EPSG/0/25832"
 
 
 def test_collection_item_get_bbox_with_bbox_crs(app_client, load_test_data):
@@ -1497,6 +1509,7 @@ def test_collection_item_get_bbox_with_bbox_crs(app_client, load_test_data):
         matching_feat[0]["properties"]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/EPSG/0/25832"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/EPSG/0/25832"
 
 
 def test_single_item_get_bbox_crs_with_crs(app_client, load_test_data):
@@ -1515,6 +1528,7 @@ def test_single_item_get_bbox_crs_with_crs(app_client, load_test_data):
 
     resp_json = resp.json()
     assert resp_json["context"]["matched"] == 50
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
 
 def test_item_search_bbox_crs_with_crs(app_client, load_test_data):
@@ -1541,6 +1555,7 @@ def test_item_search_bbox_crs_with_crs(app_client, load_test_data):
         matching_feat[0]["properties"]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/EPSG/0/25832"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/EPSG/0/25832"
 
 
 def test_item_post_bbox_with_bbox_crs(app_client, load_test_data):
@@ -1566,6 +1581,7 @@ def test_item_post_bbox_with_bbox_crs(app_client, load_test_data):
         matching_feat[0]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
 
 def test_item_post_bbox_with_crs(app_client, load_test_data):
@@ -1592,6 +1608,7 @@ def test_item_post_bbox_with_crs(app_client, load_test_data):
         matching_feat[0]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/EPSG/0/25832"
     )
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/EPSG/0/25832"
 
 
 def test_item_wrong_crs(app_client, load_test_data):
