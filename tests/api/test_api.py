@@ -432,9 +432,13 @@ def test_search_invalid_date(load_test_data, app_client):
 
     resp = app_client.get("/search", params=params)
     assert resp.status_code == 400
+    resp_json = resp.json()
+    assert resp_json["detail"] == "Invalid RFC3339 datetime."
 
     resp = app_client.post("/search", json=params)
     assert resp.status_code == 400
+    resp_json = resp.json()
+    assert resp_json["detail"] == "Invalid RFC3339 datetime."
 
 
 #def test_search_point_intersects(load_test_data, app_client, postgres_transactions):
