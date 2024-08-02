@@ -20,12 +20,12 @@ install_requires = [
     "alembic",
     "fastapi-utils",
     "pygeofilter==0.2.*",
+    "orjson",
 ]
 
 extra_reqs = {
     "dev": [
         "httpx",  # for starlette's test client
-        "orjson",
         "pystac[validation]",
         "pytest",
         "pytest-cov",
