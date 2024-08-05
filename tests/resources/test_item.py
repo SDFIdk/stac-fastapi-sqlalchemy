@@ -1775,11 +1775,14 @@ def test_get_item_x_forwarded_headers(app_client, load_test_data):
         headers={
             "X-Forwarded-Proto": "https",
             "X-Forwarded-Host": "api.dataforsyningen.dk",
+            "X-Forwarded-Prefix": "/rest/skraafoto_api/v2/"
         },
     )
     for link in get_item.json()["links"]:
         # assert link["href"].startswith("https://testserver:1234/")
-        if link["href"].startswith("https://api.dataforsyningen.dk/"):
+        if link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"):
+            assert link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_api/v2/")
+        elif link["href"].startswith("https://api.dataforsyningen.dk/"):
             assert link["href"].startswith("https://api.dataforsyningen.dk/")
         else:
             # We have a license URL that does not start with the same host as the rest of the URL's
