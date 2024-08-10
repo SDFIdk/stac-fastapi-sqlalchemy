@@ -1782,8 +1782,10 @@ def test_get_item_x_forwarded_headers(app_client, load_test_data):
         # assert link["href"].startswith("https://testserver:1234/")
         if link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"):
             assert link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_api/v2/")
-        elif link["href"].startswith("https://api.dataforsyningen.dk/"):
-            assert link["href"].startswith("https://api.dataforsyningen.dk/")
+        elif link["href"].startswith("https://cdn.dataforsyningen.dk/skraafoto_server/"):
+            assert link["href"].startswith("https://cdn.dataforsyningen.dk/skraafoto_server/")
+        elif link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_cogtiler_test/v1.0/"):
+            assert link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_cogtiler_test/v1.0/")
         else:
             # We have a license URL that does not start with the same host as the rest of the URL's
             assert link["href"].startswith("https://sdfi.dk/")
