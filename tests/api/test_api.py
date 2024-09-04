@@ -416,7 +416,7 @@ def test_app_sort_extension_url_encoded(app_client):
 
     get_params = {
         "collections": "skraafotos2021",
-        "sortby": "%2Bdatetime",
+        "sortby": "+datetime",
     }
 
     resp = app_client.get("/search", params=get_params)
