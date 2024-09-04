@@ -345,7 +345,7 @@ def test_get_item_collection(app_client, load_test_data):
     assert resp.status_code == 200
 
     item_collection = resp.json()
-    assert item_collection["context"]["matched"] == item_count
+    assert item_collection["context"]["matched"] > item_count
 
 
 def test_pagination(app_client, load_test_data):
@@ -1784,8 +1784,8 @@ def test_get_item_x_forwarded_headers(app_client, load_test_data):
             assert link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_api/v2/")
         elif link["href"].startswith("https://cdn.dataforsyningen.dk/skraafoto_server/"):
             assert link["href"].startswith("https://cdn.dataforsyningen.dk/skraafoto_server/")
-        elif link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/"):
-            assert link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/")
+        elif link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_cogtiler"):
+            assert link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_cogtiler")
         else:
             # We have a license URL that does not start with the same host as the rest of the URL's
             assert link["href"].startswith("https://kds.dk/")

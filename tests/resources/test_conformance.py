@@ -92,4 +92,4 @@ def test_search_link(response_json):
     assert search_link.get("type") == "application/geo+json"
 
     search_path = urllib.parse.urlsplit(search_link.get("href")).path
-    assert search_path == "/search"
+    assert search_path == "/rest/skraafoto_api/v2/search"
