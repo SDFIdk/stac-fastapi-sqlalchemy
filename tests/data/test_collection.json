@@ -14,8 +14,8 @@
     "license": "various",
     "providers": [
         {
-            "url": "https://kds.dk",
-            "name": "Klimadatastyrelsen",
+            "url": "https://www.sdfi.dk",
+            "name": "SDFI",
             "roles": [
                 "host",
                 "licensor"
