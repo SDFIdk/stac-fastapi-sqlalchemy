@@ -1147,7 +1147,7 @@ Content-Type: application/geo+json
                     },
                     {
                         "url": "https://kds.dk/",
-                        "name": "SDFI",
+                        "name": "Klimadatastyrelsen",
                         "roles": [
                             "licensor",
                             "host"
@@ -1366,7 +1366,7 @@ Content-Type: application/geo+json
                     },
                     {
                         "url": "https://kds.dk/",
-                        "name": "SDFI",
+                        "name": "Klimadatastyrelsen",
                         "roles": [
                             "licensor",
                             "host"
@@ -1586,7 +1586,7 @@ Content-Type: application/geo+json
                     },
                     {
                         "url": "https://kds.dk/",
-                        "name": "SDFI",
+                        "name": "Klimadatastyrelsen",
                         "roles": [
                             "licensor",
                             "host"
