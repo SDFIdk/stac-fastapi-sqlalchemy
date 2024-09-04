@@ -14,8 +14,8 @@
     "license": "various",
     "providers": [
         {
-            "url": "https://www.sdfi.dk",
-            "name": "SDFI",
+            "url": "https://kds.dk",
+            "name": "Klimadatastyrelsen",
             "roles": [
                 "host",
                 "licensor"
@@ -66,9 +66,9 @@
         },
         {
             "rel": "license",
-            "href": "https://sdfi.dk/om-os/vilkaar-og-priser",
+            "href": "https://kds.dk/om-os/vilkaar-og-priser",
             "type": "text/html; charset=UTF-8",
-            "title": "SDFI license terms"
+            "title": "Klimadatastyrelsen license terms"
         }
     ]
 }
