@@ -8,7 +8,7 @@ from typing import List, Optional, Set, Type, Union, Dict, Any
 from urllib.parse import unquote_plus, urlencode, urljoin
 
 import attr
-import geoalchemy2 as ga
+# import geoalchemy2 as ga
 import sqlalchemy as sa
 import stac_pydantic
 #from fastapi import HTTPException
@@ -229,7 +229,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         """Returns Ad Hoc SQL expression which can be applied to a "deferred expression" attribute.
         The expression makes sure the geometry is returned in the requested SRID."""
         if to_srid != self.storage_srid:
-            geom = ga.func.ST_Transform(self.item_table.footprint, to_srid)
+            geom = sa.func.ST_Transform(self.item_table.footprint, to_srid)
         else:
             geom = self.item_table.footprint
 
@@ -245,7 +245,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         with_expression() needs to be triggered for it to be made Ad Hoc
         The expression makes sure the BBOX is returned in the requested SRID."""
         if to_srid != self.storage_srid:
-            geom = ga.func.ST_Transform(self.item_table.footprint, to_srid)
+            geom = sa.func.ST_Transform(self.item_table.footprint, to_srid)
         else:
             geom = self.item_table.footprint
 
@@ -253,10 +253,10 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             self.item_table.bbox,
             array(
                 [
-                    ga.func.ST_XMin(ga.func.ST_Envelope(geom)),
-                    ga.func.ST_YMin(ga.func.ST_Envelope(geom)),
-                    ga.func.ST_XMax(ga.func.ST_Envelope(geom)),
-                    ga.func.ST_YMax(ga.func.ST_Envelope(geom)),
+                    sa.func.ST_XMin(sa.func.ST_Envelope(geom)),
+                    sa.func.ST_YMin(sa.func.ST_Envelope(geom)),
+                    sa.func.ST_XMax(sa.func.ST_Envelope(geom)),
+                    sa.func.ST_YMax(sa.func.ST_Envelope(geom)),
                 ]
             ),
         )
@@ -437,26 +437,26 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
  
                 if bbox_srid == self.storage_srid:
                     query = query.filter(
-                        ga.func.ST_Intersects(
+                        sa.func.ST_Intersects(
                             self.item_table.footprint, filter_geom
                         )
                     )
                 else:
                 # Need to transform the input bbox value srid to storage_srid     
                     query = query.filter(
-                        ga.func.ST_Intersects(
-                            ga.func.ST_Transform(filter_geom, self.storage_srid),
+                        sa.func.ST_Intersects(
+                            sa.func.ST_Transform(filter_geom, self.storage_srid),
                             self.item_table.footprint
                         ),
                     )
 
                 # Finds and sorts by the input geometry centroid and calculates the distance to the footprint centroid.
-                distance = ga.func.ST_Distance(
-                    ga.func.ST_Centroid(
-                            ga.func.ST_Envelope(self.item_table.footprint)
+                distance = sa.func.ST_Distance(
+                    sa.func.ST_Centroid(
+                            sa.func.ST_Envelope(self.item_table.footprint)
                         ),
                     # Footprint in the database are in srid 4326
-                    ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid), bbox_srid),self.storage_srid)
+                    sa.func.ST_Transform(sa.func.ST_GeomFromText(str(geom.centroid), bbox_srid),self.storage_srid)
                     )
 
                 query = query.order_by(distance)
@@ -529,12 +529,12 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     geom = shape(geometry)
                 if geom:
                     # Finds and sorts by the input geometry centroid and calculates the distance to the footprint centroid.
-                    distance = ga.func.ST_Distance(
-                        ga.func.ST_Centroid(
-                                ga.func.ST_Envelope(self.item_table.footprint)
+                    distance = sa.func.ST_Distance(
+                        sa.func.ST_Centroid(
+                                sa.func.ST_Envelope(self.item_table.footprint)
                             ),
                         # Footprint in the database are in srid 4326
-                        ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid), filter_srid), self.storage_srid)
+                        sa.func.ST_Transform(sa.func.ST_GeomFromText(str(geom.centroid), filter_srid), self.storage_srid)
                         )
 
                     query = query.filter(sa_expr).order_by(distance)
@@ -959,15 +959,15 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
     
                     if bbox_srid == self.storage_srid:
                         query = query.filter(
-                            ga.func.ST_Intersects(
+                            sa.func.ST_Intersects(
                                 self.item_table.footprint, filter_geom
                             )
                         )
                     else:
                     # Need to transform the input bbox value srid to storage_srid     
                         query = query.filter(
-                            ga.func.ST_Intersects(
-                                ga.func.ST_Transform(filter_geom, self.storage_srid),
+                            sa.func.ST_Intersects(
+                                sa.func.ST_Transform(filter_geom, self.storage_srid),
                                 self.item_table.footprint
                             ),
                         )
@@ -975,12 +975,12 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                     # if sortby is None, items get sorted by shortest distance to geom
                     if search_request.sortby is None:
                         # Finds and sorts by the input geometry centroid and calculates the distance to the footprint centroid.
-                        distance = ga.func.ST_Distance(
-                            ga.func.ST_Centroid(
-                                    ga.func.ST_Envelope(self.item_table.footprint)
+                        distance = sa.func.ST_Distance(
+                            sa.func.ST_Centroid(
+                                    sa.func.ST_Envelope(self.item_table.footprint)
                                 ),
                             # Footprint in the database are in srid 4326
-                            ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid), bbox_srid), self.storage_srid)
+                            sa.func.ST_Transform(sa.func.ST_GeomFromText(str(geom.centroid), bbox_srid), self.storage_srid)
                             )
 
                         query = query.order_by(distance)
@@ -1032,12 +1032,12 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                         geom = shape(geometry)
                     if geom:
                         # Finds and sorts by the input geometry centroid and calculates the distance to the footprint centroid.
-                        distance = ga.func.ST_Distance(
-                            ga.func.ST_Centroid(
-                                    ga.func.ST_Envelope(self.item_table.footprint)
+                        distance = sa.func.ST_Distance(
+                            sa.func.ST_Centroid(
+                                    sa.func.ST_Envelope(self.item_table.footprint)
                                 ),
                             # Footprint in the database are in srid 4326
-                            ga.func.ST_Transform(ga.func.ST_GeomFromText(str(geom.centroid), filter_srid), self.storage_srid)
+                            sa.func.ST_Transform(sa.func.ST_GeomFromText(str(geom.centroid), filter_srid), self.storage_srid)
                             )
 
                         query = query.filter(sa_expr).order_by(distance)
