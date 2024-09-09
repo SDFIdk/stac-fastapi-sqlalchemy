@@ -8,7 +8,7 @@ from typing import List, Optional, Set, Type, Union, Dict, Any
 from urllib.parse import unquote_plus, urlencode, urljoin
 
 import attr
-# import geoalchemy2 as ga
+import geoalchemy2 as ga
 import sqlalchemy as sa
 import stac_pydantic
 #from fastapi import HTTPException
@@ -19,7 +19,6 @@ from pydantic import ValidationError
 from shapely.geometry import Polygon as ShapelyPolygon
 from shapely.geometry import shape
 from sqlakeyset import get_page
-from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import array
 from sqlalchemy.orm import Session as SqlSession, with_expression
 from stac_fastapi.types.config import Settings
