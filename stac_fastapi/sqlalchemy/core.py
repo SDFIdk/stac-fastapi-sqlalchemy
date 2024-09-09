@@ -54,9 +54,9 @@ def monkeypatch_parse_geometry(geom):
     
     crs = geom["crs"] if "crs" in geom.keys() else 4326
     if crs == 4326:
-        return func.ST_GeomFromText(wkt, 4326)
+        return sa.func.ST_GeomFromText(wkt, 4326)
     else:
-        return func.ST_Transform(func.ST_GeomFromText(wkt, crs), 4326)
+        return sa.func.ST_Transform(sa.func.ST_GeomFromText(wkt, crs), 4326)
     
 def add_filter_crs(data, crs):
     """Add filter-crs to geometry objects in filter
@@ -546,7 +546,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             count = None
             if self.extension_is_enabled("ContextExtension"):
                 count_query = query.statement.with_only_columns(
-                    [func.count()]
+                    [sa.func.count()]
                 ).order_by(None)
                 count = query.session.execute(count_query).scalar()
                 
@@ -1094,7 +1094,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
                 if self.extension_is_enabled("ContextExtension"):
                     count_query = query.statement.with_only_columns(
-                        [func.count()]
+                        [sa.func.count()]
                     ).order_by(None)
                     count = query.session.execute(count_query).scalar()
                 #page = get_page(query, per_page=search_request.limit, page=token)
