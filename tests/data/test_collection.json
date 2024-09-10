@@ -14,7 +14,7 @@
     "license": "various",
     "providers": [
         {
-            "url": "https://www.klimadatastyrelsen.dk/",
+            "url": "https://kds.dk/",
             "name": "KDS",
             "roles": [
                 "host",
@@ -66,9 +66,9 @@
         },
         {
             "rel": "license",
-            "href": "https://www.klimadatastyrelsen.dk/om-os/vilkaar-og-priser",
+            "href": "https://kds.dk/om-os/vilkaar-og-priser",
             "type": "text/html; charset=UTF-8",
-            "title": "Klimadatastyrelsen license terms"
+            "title": "KDS license terms"
         }
     ]
 }

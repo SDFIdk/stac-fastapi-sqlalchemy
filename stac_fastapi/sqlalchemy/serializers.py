@@ -98,9 +98,9 @@ class ItemSerializer(Serializer):
         add_links = [
             {
                 "rel": "license",
-                "href": "https://www.klimadatastyrelsen.dk/om-os/vilkaar-og-priser",
+                "href": "https://kds.dk/om-os/vilkaar-og-priser",
                 "type": "text/html; charset=UTF-8",
-                "title": "Klimadatastyrelsen license terms",
+                "title": "KDS license terms",
             },
             {
                 "rel": "alternate",
@@ -168,7 +168,7 @@ class ItemSerializer(Serializer):
         cls._add_if_not_none(properties, "instruments", [instrument_id])
         properties["providers"] = [
             {"name": db_model.producer, "roles": ["producer"]},
-            {"url": "https://www.klimadatastyrelsen.dk/", "name": "Klimadatastyrelsen", "roles": ["licensor", "host"]},
+            {"url": "https://kds.dk/", "name": "KDS", "roles": ["licensor", "host"]},
         ]    
 
         # Proj: https://github.com/stac-extensions/projection
@@ -182,7 +182,7 @@ class ItemSerializer(Serializer):
         cls._add_if_not_none(properties, "view:azimuth", db_model.azimuth)
         cls._add_if_not_none(properties, "view:off_nadir", db_model.offnadir)
 
-        # Homegrown Klimadatastyrelsen
+        # Homegrown KDS
         properties["direction"] = db_model.direction
         properties["estimated_accuracy"] = db_model.estacc
 

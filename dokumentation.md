@@ -38,8 +38,8 @@ Selve APIet, der udstiller metadata i form af [STAC Items](#stac-item) organiser
     "license": "various",
     "providers": [
         {
-            "url": "https://www.klimadatastyrelsen.dk",
-            "name": "Klimadatastyrelsen",
+            "url": "https://kds.dk",
+            "name": "KDS",
             "roles": [
                 "host",
                 "licensor"
@@ -92,7 +92,7 @@ Selve APIet, der udstiller metadata i form af [STAC Items](#stac-item) organiser
             "rel": "license",
             "href": "https://dataforsyningen.dk/Vilkaar",
             "type": "text/html; charset=UTF-8",
-            "title": "Klimadatastyrelsen license terms"
+            "title": "KDS license terms"
         }
     ]
 }
@@ -166,8 +166,8 @@ Dataelementerne returneret i en `Collection` er beskrevet i [STAC Collection Spe
                 ]
             },
             {
-                "url": "https://www.klimadatastyrelsen.dk/",
-                "name": "Klimadatastyrelsen",
+                "url": "https://kds.dk/",
+                "name": "KDS",
                 "roles": [
                     "licensor",
                     "host"
@@ -253,7 +253,7 @@ Dataelementerne returneret i en `Collection` er beskrevet i [STAC Collection Spe
             "rel": "license",
             "href": "https://dataforsyningen.dk/Vilkaar",
             "type": "text/html; charset=UTF-8",
-            "title": "Klimadatastyrelsen license terms"
+            "title": "KDS license terms"
         },
         {
             "rel": "alternate",
@@ -1146,8 +1146,8 @@ Content-Type: application/geo+json
                         ]
                     },
                     {
-                        "url": "https://www.klimadatastyrelsen.dk/",
-                        "name": "Klimadatastyrelsen",
+                        "url": "https://kds.dk/",
+                        "name": "KDS",
                         "roles": [
                             "licensor",
                             "host"
@@ -1227,7 +1227,7 @@ Content-Type: application/geo+json
                     "rel": "license",
                     "href": "https://dataforsyningen.dk/Vilkaar",
                     "type": "text/html; charset=UTF-8",
-                    "title": "Klimadatastyrelsen license terms"
+                    "title": "KDS license terms"
                 },
                 {
                     "rel": "alternate",
@@ -1365,8 +1365,8 @@ Content-Type: application/geo+json
                         ]
                     },
                     {
-                        "url": "https://www.klimadatastyrelsen.dk/",
-                        "name": "Klimadatastyrelsen",
+                        "url": "https://kds.dk/",
+                        "name": "KDS",
                         "roles": [
                             "licensor",
                             "host"
@@ -1446,7 +1446,7 @@ Content-Type: application/geo+json
                     "rel": "license",
                     "href": "https://dataforsyningen.dk/Vilkaar",
                     "type": "text/html; charset=UTF-8",
-                    "title": "Klimadatastyrelsen license terms"
+                    "title": "KDS license terms"
                 },
                 {
                     "rel": "alternate",
@@ -1585,8 +1585,8 @@ Content-Type: application/geo+json
                         ]
                     },
                     {
-                        "url": "https://www.klimadatastyrelsen.dk/",
-                        "name": "Klimadatastyrelsen",
+                        "url": "https://kds.dk/",
+                        "name": "KDS",
                         "roles": [
                             "licensor",
                             "host"
@@ -1666,7 +1666,7 @@ Content-Type: application/geo+json
                     "rel": "license",
                     "href": "https://dataforsyningen.dk/Vilkaar",
                     "type": "text/html; charset=UTF-8",
-                    "title": "Klimadatastyrelsen license terms"
+                    "title": "KDS license terms"
                 },
                 {
                     "rel": "alternate",
