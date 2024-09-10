@@ -168,7 +168,7 @@ class ItemSerializer(Serializer):
         cls._add_if_not_none(properties, "instruments", [instrument_id])
         properties["providers"] = [
             {"name": db_model.producer, "roles": ["producer"]},
-            {"url": "https://kds.dk/", "name": "KDS", "roles": ["licensor", "host"]},
+            {"url": "https://kds.dk", "name": "KDS", "roles": ["licensor", "host"]},
         ]    
 
         # Proj: https://github.com/stac-extensions/projection

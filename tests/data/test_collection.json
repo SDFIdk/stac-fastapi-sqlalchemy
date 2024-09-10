@@ -14,7 +14,7 @@
     "license": "various",
     "providers": [
         {
-            "url": "https://kds.dk/",
+            "url": "https://kds.dk",
             "name": "KDS",
             "roles": [
                 "host",
