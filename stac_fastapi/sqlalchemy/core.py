@@ -548,8 +548,8 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             count = None
             if self.extension_is_enabled("ContextExtension"):                
                 count_query = query.with_only_columns(
-                        sa.func.count()
-                    ).order_by(None)
+                    sa.func.count()
+                ).order_by(None)
                 count = session.execute(count_query).scalar()
                 
             #token = self.get_token(token) if token else token
@@ -642,7 +642,9 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 )
 
             response_features = []
+            # page returns as a list with tuple(s) with one Item object in each tuple
             for item in page:
+                # The Item object is on the first index in its tuple
                 serialized_item = self.item_serializer.db_to_stac(
                     item[0], hrefbuilder=hrefbuilder)
                 response_features.append(
@@ -1185,7 +1187,9 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             response_features = []
             filter_kwargs = {}
 
+            # page returns as a list with tuple(s) with one Item object in each tuple
             for item in page:
+                # The Item object is on the first index in its tuple
                 response_features.append(
                     #self.item_serializer.db_to_stac(item, base_url=base_url)
                     self.item_serializer.db_to_stac(item[0], hrefbuilder=hrefbuilder)
