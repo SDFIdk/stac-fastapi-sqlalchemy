@@ -18,7 +18,7 @@ from stac_fastapi.api.models import GeoJSONResponse
 from pydantic import ValidationError
 from shapely.geometry import Polygon as ShapelyPolygon
 from shapely.geometry import shape
-from sqlakeyset import get_page
+from sqlakeyset import select_page
 from sqlalchemy.dialects.postgresql import array
 from sqlalchemy.orm import Session as SqlSession, with_expression
 from stac_fastapi.types.config import Settings
@@ -219,7 +219,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         id: str, table: Type[database.BaseModel], session: SqlSession
     ) -> Type[database.BaseModel]:
         """Lookup row by id."""
-        row = session.query(table).filter(table.id == id).first()
+        row = session.get(table, id)
         if not row:
             raise NotFoundError(f"{table.__name__} {id} not found")
         return row
@@ -283,7 +283,9 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         #base_url = str(kwargs["request"].base_url)
         hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
-            collections = session.query(self.collection_table).all()
+            stmt = sa.select(self.collection_table)
+            collections = session.scalars(stmt).all()
+
             serialized_collections = [
                 #self.collection_serializer.db_to_stac(collection, base_url=base_url)
                 self.collection_serializer.db_to_stac(collection, hrefbuilder=hrefbuilder)
@@ -361,7 +363,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             # Look up the collection first to get a 404 if it doesn't exist
             _ = self._lookup_id(collection_id, self.collection_table, session)
             query = (
-                session.query(self.item_table)
+                sa.select(self.item_table)
                 .join(self.collection_table)
                 .filter(self.collection_table.id == collection_id)
                 #.order_by(self.item_table.datetime.desc(), self.item_table.id)
@@ -545,15 +547,15 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
 
             count = None
             if self.extension_is_enabled("ContextExtension"):
-                count_query = query.statement.with_only_columns(
-                    [sa.func.count()]
+                count_query = query.with_only_columns(
+                    sa.func.count()
                 ).order_by(None)
-                count = query.session.execute(count_query).scalar()
+                count = session.execute(count_query).scalar()
                 
             #token = self.get_token(token) if token else token
             pagination_token = (self.from_token(pt) if pt else pt)
             #page = get_page(query, per_page=limit, page=(token or False))
-            page = get_page(query, per_page=limit, page=(pagination_token or False))
+            page = select_page(session, query, per_page=limit, page=(pagination_token or False))
             # Create dynamic attributes for each page
             page.next = (
                 # We don't insert tokens into the database
@@ -640,9 +642,11 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 )
 
             response_features = []
+            # page returns as a list with tuple(s) with one Item object in each tuple
             for item in page:
+                # The Item object is on the first index in its tuple
                 serialized_item = self.item_serializer.db_to_stac(
-                    item, hrefbuilder=hrefbuilder)
+                    item[0], hrefbuilder=hrefbuilder)
                 response_features.append(
                     # self.item_serializer.db_to_stac(item, base_url=base_url)
                     serialized_item
@@ -700,12 +704,12 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
         # base_url = str(kwargs["request"].base_url)
         hrefbuilder = self.href_builder(**kwargs)
         with self.session.reader.context_session() as session:
-            db_query = session.query(self.item_table)
+            db_query = sa.select(self.item_table)
             db_query = db_query.filter(self.item_table.collection_id == collection_id)
             db_query = db_query.filter(self.item_table.id == item_id)
             db_query = db_query.options(self._geometry_expression(output_srid))
             db_query = db_query.options(self._bbox_expression(output_srid))
-            item = db_query.first()
+            item = session.execute(db_query).scalars().first()
             if not item:
                 raise NotFoundError(f"{self.item_table.__name__} {item_id} not found")
             # return self.item_serializer.db_to_stac(item, base_url=base_url)
@@ -869,7 +873,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             pagination_token = (
                 self.from_token(search_request.pt) if search_request.pt else False
             )
-            query = session.query(self.item_table)
+            query = sa.select(self.item_table)
 
             # crs has a default value
             if self.extension_is_enabled("CrsExtension"):
@@ -913,7 +917,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 )
                 items = query.filter(id_filter).order_by(self.item_table.id)
                 #page = get_page(items, per_page=search_request.limit, page=token)
-                page = get_page(items, per_page=search_request.limit, page=pagination_token)
+                page = select_page(session, items, per_page=search_request.limit, page=(pagination_token or False))
                 if self.extension_is_enabled("ContextExtension"):
                     count = len(search_request.ids)
                 page.next = (
@@ -1093,12 +1097,12 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
                 #                 query = query.filter(op.operator(field, value))
 
                 if self.extension_is_enabled("ContextExtension"):
-                    count_query = query.statement.with_only_columns(
-                        [sa.func.count()]
+                    count_query = query.with_only_columns(
+                        sa.func.count()
                     ).order_by(None)
-                    count = query.session.execute(count_query).scalar()
+                    count = session.execute(count_query).scalar()
                 #page = get_page(query, per_page=search_request.limit, page=token)
-                page = get_page(query, per_page=search_request.limit, page=pagination_token)
+                page = select_page(session, query, per_page=search_request.limit, page=(pagination_token or False))
                 # Create dynamic attributes for each page
                 page.next = (
                     # We don't insert tokens into the database
@@ -1183,10 +1187,12 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             response_features = []
             filter_kwargs = {}
 
+            # page returns as a list with tuple(s) with one Item object in each tuple
             for item in page:
+                # The Item object is on the first index in its tuple
                 response_features.append(
                     #self.item_serializer.db_to_stac(item, base_url=base_url)
-                    self.item_serializer.db_to_stac(item, hrefbuilder=hrefbuilder)
+                    self.item_serializer.db_to_stac(item[0], hrefbuilder=hrefbuilder)
                 )
 
             # Use pydantic includes/excludes syntax to implement fields extension

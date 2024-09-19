@@ -7,8 +7,7 @@ import geoalchemy2 as ga
 import sqlalchemy as sa
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import query_expression
+from sqlalchemy.orm import query_expression, declarative_base
 
 #from stac_fastapi.sqlalchemy.extensions.query import Queryables, QueryableTypes
 from stac_fastapi.sqlalchemy.types.filter import Queryables
@@ -21,6 +20,8 @@ class GeojsonGeometry(ga.Geometry):
     """Custom geoalchemy type which returns GeoJSON."""
 
     from_text = "ST_GeomFromGeoJSON"
+
+    cache_ok = True
 
     def result_processor(self, dialect: str, coltype):
         """Override default processer to return GeoJSON."""

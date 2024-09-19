@@ -14,7 +14,7 @@ install_requires = [
     "stac-fastapi.extensions",
     "sqlakeyset",
     "geoalchemy2>=0.15.2",
-    "sqlalchemy==1.4.54",
+    "sqlalchemy==2.0.35",
     "shapely",
     "psycopg2-binary",
     "alembic",
