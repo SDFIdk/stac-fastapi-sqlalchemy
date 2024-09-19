@@ -546,7 +546,7 @@ class CoreCrudClient(PaginationTokenClient, BaseCoreClient):
             query = query.order_by(self.item_table.datetime.desc(), self.item_table.id)
 
             count = None
-            if self.extension_is_enabled("ContextExtension"):                
+            if self.extension_is_enabled("ContextExtension"):
                 count_query = query.with_only_columns(
                     sa.func.count()
                 ).order_by(None)
