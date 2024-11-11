@@ -71,22 +71,22 @@ Selve APIet, der udstiller metadata i form af [STAC Items](#stac-item) organiser
         {
             "rel": "self",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2021"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021"
         },
         {
             "rel": "parent",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
         },
         {
             "rel": "items",
             "type": "application/geo+json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2021/items"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021/items"
         },
         {
             "rel": "root",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
         },
         {
             "rel": "license",
@@ -219,8 +219,7 @@ Dataelementerne returneret i en `Collection` er beskrevet i [STAC Collection Spe
                 8669
             ]
         },
-        "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2021/10km_614_59/1km_6145_592/2021_83_36_1_0020_00003045.tif",
-        "asset:thumbnail": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2Fv1.0COG_oblique_2021%2F10km_614_59%2F1km_6145_592%2F2021_83_36_1_0020_00003045.tif",
+        "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2021/10km_614_59/1km_6145_592/2021_83_36_1_0020_00003045.tif"
         "crs": {
             "type": "name",
             "properties": {
@@ -232,34 +231,28 @@ Dataelementerne returneret i en `Collection` er beskrevet i [STAC Collection Spe
         {
             "rel": "self",
             "type": "application/geo+json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2021/items/2021_83_36_1_0020_00003045"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021/items/2021_83_36_1_0020_00003045"
         },
         {
             "rel": "parent",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2021"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021"
         },
         {
             "rel": "collection",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2021"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021"
         },
         {
             "rel": "root",
             "type": "application/json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/"
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
         },
         {
             "rel": "license",
             "href": "https://dataforsyningen.dk/Vilkaar",
             "type": "text/html; charset=UTF-8",
             "title": "KDS license terms"
-        },
-        {
-            "rel": "alternate",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/viewer.html?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2Fv1.0COG_oblique_2021%2F10km_614_59%2F1km_6145_592%2F2021_83_36_1_0020_00003045.tif",
-            "type": "text/html; charset=UTF-8",
-            "title": "Interactive image viewer"
         }
     ],
     "assets": {
@@ -270,14 +263,6 @@ Dataelementerne returneret i en `Collection` er beskrevet i [STAC Collection Spe
                 "data"
             ],
             "title": "Raw tiff file"
-        },
-        "thumbnail": {
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2Fv1.0COG_oblique_2021%2F10km_614_59%2F1km_6145_592%2F2021_83_36_1_0020_00003045.tif",
-            "type": "image/jpeg",
-            "roles": [
-                "thumbnail"
-            ],
-            "title": "Thumbnail"
         }
     }
 }
@@ -314,7 +299,7 @@ Hvis token er autoriseret, men requesten har en ugyldig parameter, returneres en
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0 HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2 HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -336,7 +321,7 @@ STAC Catalog (JSON)
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/conformance HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/conformance HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -358,7 +343,7 @@ Array af conformance klasser (JSON)
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items/2019_83_37_2_0046_00001113 HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items/2019_83_37_2_0046_00001113 HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -384,7 +369,7 @@ Feature (STAC Item) (GeoJSON)
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -392,7 +377,7 @@ Content-Type: application/geo+json
 > Code samples
 
 ```http
-POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search HTTP/1.1
+POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -428,7 +413,7 @@ FeatureCollection (Array af STAC Items) (GeoJSON)
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -450,7 +435,7 @@ Collections (Array af STAC Collections) (JSON)
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019 HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019 HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -474,7 +459,7 @@ Collection (STAC Collection) (JSON)
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -507,7 +492,7 @@ FeatureCollection (Array af STAC Items) (GeoJSON)
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/queryables HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/queryables HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -529,7 +514,7 @@ Array af STAC Item properties, der kan bruges over alle collections i filter udt
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/queryables HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/queryables HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -565,14 +550,14 @@ Ud over de nævnte fire core-komponenter, indeholder servicen også en række ex
     {
         "rel": "self",
         "type": "application/geo+json",
-        "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items?limit=10",
+        "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items?limit=10",
         "method": "GET",
         "body": false
     },
     {
         "rel": "next",
         "type": "application/geo+json",
-        "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items?limit=10&pt=PmR0OjIwMTktMDctMTAgMTE6MDM6MzIrMDI6MDB-czoyMDE5XzgzXzM3XzJfMDA0OF8wMDAwMDg5NQ%3D%3D",
+        "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items?limit=10&pt=PmR0OjIwMTktMDctMTAgMTE6MDM6MzIrMDI6MDB-czoyMDE5XzgzXzM3XzJfMDA0OF8wMDAwMDg5NQ%3D%3D",
         "method": "GET",
         "body": false
     }
@@ -603,7 +588,7 @@ Eksempler på brug af parametrene `crs`, `bbox-crs`, og `filter-crs`:
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items?crs=http://www.opengis.net/def/crs/EPSG/0/25832 HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items?crs=http://www.opengis.net/def/crs/EPSG/0/25832 HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -613,7 +598,7 @@ Content-Type: application/geo+json
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2021/items?bbox=492283,6195600,493583,6196470&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/25832 HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021/items?bbox=492283,6195600,493583,6196470&bbox-crs=http://www.opengis.net/def/crs/EPSG/0/25832 HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -623,7 +608,7 @@ Content-Type: application/geo+json
 > Code samples
 
 ```http
-POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search HTTP/1.1
+POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 
@@ -665,7 +650,7 @@ Eksempler på brug af filter parameter:
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2021/items?filter={%22contains%22:[{%22property%22:%22geometry%22},{%22type%22:%22Point%22,%22coordinates%22:[10.3285,55.3556]}]}&filter-lang=cql-json&filter-crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84&crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84 HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021/items?filter={%22contains%22:[{%22property%22:%22geometry%22},{%22type%22:%22Point%22,%22coordinates%22:[10.3285,55.3556]}]}&filter-lang=cql-json&filter-crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84&crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84 HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -675,7 +660,7 @@ Content-Type: application/geo+json
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search?filter={%22contains%22:[{%22property%22:%22geometry%22},{%22type%22:%22Point%22,%22coordinates%22:[10.3285,55.3556]}]}&filter-lang=cql-json&filter-crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84&crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84 HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search?filter={%22contains%22:[{%22property%22:%22geometry%22},{%22type%22:%22Point%22,%22coordinates%22:[10.3285,55.3556]}]}&filter-lang=cql-json&filter-crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84&crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84 HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -685,7 +670,7 @@ Content-Type: application/geo+json
 > Code samples
 
 ```http
-POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search HTTP/1.1
+POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 
@@ -714,7 +699,7 @@ Content-Type: application/geo+json
 > Code samples
 
 ```http
-POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search HTTP/1.1
+POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 
@@ -739,7 +724,7 @@ Content-Type: application/geo+json
 > Code samples
 
 ```http
-POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search HTTP/1.1
+POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 
@@ -768,7 +753,7 @@ Eksempler på brug af `sortby` parameter:
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search?sortby=+properties.datetime HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search?sortby=+properties.datetime HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -778,7 +763,7 @@ Content-Type: application/geo+json
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search?sortby=properties.datetime,-id HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search?sortby=properties.datetime,-id HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -788,7 +773,7 @@ Content-Type: application/geo+json
 > Code samples
 
 ```http
-POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search HTTP/1.1
+POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 
@@ -812,12 +797,6 @@ Nærmere beskrivelse af [Sort Extension](https://github.com/radiantearth/stac-ap
 ...
 "links": [
     ...
-    {
-        "rel": "alternate",
-        "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/viewer.html?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2Fv1.0COG_oblique_2021%2F10km_614_59%2F1km_6145_592%2F2021_83_36_1_0020_00003045.tif",
-        "type": "text/html; charset=UTF-8",
-        "title": "Interactive image viewer"
-    }
 ],
 "assets": {
     "data": {
@@ -827,14 +806,6 @@ Nærmere beskrivelse af [Sort Extension](https://github.com/radiantearth/stac-ap
             "data"
         ],
         "title": "Raw tiff file"
-    },
-    "thumbnail": {
-        "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2Fv1.0COG_oblique_2021%2F10km_614_59%2F1km_6145_592%2F2021_83_36_1_0020_00003045.tif",
-        "type": "image/jpeg",
-        "roles": [
-            "thumbnail"
-        ],
-        "title": "Thumbnail"
     }
 }
 ...
@@ -863,6 +834,10 @@ Det originale flyfoto, hvis URL findes under `/assets/data/href`, er i "Cloud Op
 Læs mere på [www.cogeo.org](https://www.cogeo.org/).
 
 **Viewer**
+
+<mark>Denne viewer bliver lukket den 1. april 2025.</mark>
+
+_Skraafoto STAC v2 har ikke disse links, følgende information er kun gældende for Skraafoto STAC v1.0._
 
 Dataforsyningen udstiller en online-viewer til meget enkel visning af et flyfoto i en browser. URLen til denne viewer findes i metadata under `/links/` med `rel=alternate` og `type=text/html; charset=UTF-8`.
 
@@ -931,7 +906,7 @@ Guiden er en hurtig gennemgang af, hvordan man får skråfotos for et bestemt ge
 
 ### Sammenspillet mellem de tre API'er
 
-- **Skåfoto STAC API** leverer metadata om skråfotos. Dens URL starter med `https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0`, men for at bruge URL'en er det et krav, at der bliver specificeret paths og query parameters.
+- **Skåfoto STAC API** leverer metadata om skråfotos. Dens URL starter med `https://api.dataforsyningen.dk/rest/skraafoto_api/v2`, men for at bruge URL'en er det et krav, at der bliver specificeret paths og query parameters.
 - **Skåfoto Server** leverer skråfotos som [Cloud Optimized Geotiff](https://www.cogeo.org) (`COG`), hvor der kan bruges range request. Dens URL starter med `https://cdn.dataforsyningen.dk/skraafoto_server`, men for at bruge URL'en er det et krav, at der bliver specificeret paths og query parameters.
 - **Skråfoto Cogtiler** oversætter COG-formatet til JPG, der ikke understøtter COG, se mere i afsnittet [Download og visning af billeder](#download-og-visning-af-billeder). Dens URL starter med `https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0`, men for at bruge URL'en er det et krav, at der bliver specificeret paths og query parameters. Cogtilers openapi dokumentation findes [her](#skraafoto_cogtiler).
 
@@ -1010,7 +985,7 @@ Hente metadata om et bestemt skråfoto, for så at få vist selve billedet ved b
     <script>
       const fetchMetadaPromise = new Promise((resolve, reject) => {
         // Get metadata about a specific item using Skråfoto STAC API
-        fetch('https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2021/items/2021_83_36_4_0008_00004522', {
+        fetch('https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021/items/2021_83_36_4_0008_00004522', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/geo+json',
@@ -1074,7 +1049,7 @@ Hvert skråfoto har et `Item` objekt tilknyttet, som indeholder metadata for det
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items?limit=1&bbox=10.3285,55.3556,10.4536,55.4132&bbox-crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84&crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84 HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items?limit=1&bbox=10.3285,55.3556,10.4536,55.4132&bbox-crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84&crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84 HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -1206,34 +1181,28 @@ Content-Type: application/geo+json
                 {
                     "rel": "self",
                     "type": "application/geo+json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items/2019_83_36_3_0020_00000137"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items/2019_83_36_3_0020_00000137"
                 },
                 {
                     "rel": "parent",
                     "type": "application/json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019"
                 },
                 {
                     "rel": "collection",
                     "type": "application/json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019"
                 },
                 {
                     "rel": "root",
                     "type": "application/json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
                 },
                 {
                     "rel": "license",
                     "href": "https://dataforsyningen.dk/Vilkaar",
                     "type": "text/html; charset=UTF-8",
                     "title": "KDS license terms"
-                },
-                {
-                    "rel": "alternate",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/viewer.html?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2019%2F10km_613_58%2F1km_6138_588%2F2019_83_36_3_0020_00000137.tif",
-                    "type": "text/html; charset=UTF-8",
-                    "title": "Interactive image viewer"
                 }
             ],
             "assets": {
@@ -1244,14 +1213,6 @@ Content-Type: application/geo+json
                         "data"
                     ],
                     "title": "Raw tiff file"
-                },
-                "thumbnail": {
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2019%2F10km_613_58%2F1km_6138_588%2F2019_83_36_3_0020_00000137.tif",
-                    "type": "image/jpeg",
-                    "roles": [
-                        "thumbnail"
-                    ],
-                    "title": "Thumbnail"
                 }
             },
             "crs": {
@@ -1266,13 +1227,13 @@ Content-Type: application/geo+json
         {
             "rel": "self",
             "type": "application/geo+json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items?limit=1&bbox=10.3285%2C55.3556%2C10.4536%2C55.4132&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FOGC%2F1.3%2FCRS84",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items?limit=1&bbox=10.3285%2C55.3556%2C10.4536%2C55.4132&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FOGC%2F1.3%2FCRS84",
             "method": "GET"
         },
         {
             "rel": "next",
             "type": "application/geo+json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items?limit=1&bbox=10.3285%2C55.3556%2C10.4536%2C55.4132&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FOGC%2F1.3%2FCRS84&pt=PmY6MC4wMDA0MzI3MDg3NTE1NTE4NTE1fmR0OjIwMTktMDUtMTQgMTA6MDg6MDArMDI6MDB-czoyMDE5XzgzXzM2XzNfMDAyMF8wMDAwMDEzNw%3D%3D",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items?limit=1&bbox=10.3285%2C55.3556%2C10.4536%2C55.4132&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FOGC%2F1.3%2FCRS84&pt=PmY6MC4wMDA0MzI3MDg3NTE1NTE4NTE1fmR0OjIwMTktMDUtMTQgMTA6MDg6MDArMDI6MDB-czoyMDE5XzgzXzM2XzNfMDAyMF8wMDAwMDEzNw%3D%3D",
             "method": "GET"
         }
     ],
@@ -1293,7 +1254,7 @@ I dette tilfælde er det `skraafotos2019` collection. Dernæst angives query par
 > Code samples
 
 ```http
-GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search?limit=3&bbox=10.3285,55.3556,10.4536,55.4132&bbox-crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84&crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84 HTTP/1.1
+GET https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search?limit=3&bbox=10.3285,55.3556,10.4536,55.4132&bbox-crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84&crs=http://www.opengis.net/def/crs/OGC/1.3/CRS84 HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 ```
@@ -1418,41 +1379,34 @@ Content-Type: application/geo+json
                         8578.0
                     ]
                 },
-                "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2019/10km_613_58/1km_6138_588/2019_83_36_3_0020_00000137.tif",
-                "asset:thumbnail": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2019%2F10km_613_58%2F1km_6138_588%2F2019_83_36_3_0020_00000137.tif"
+                "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2019/10km_613_58/1km_6138_588/2019_83_36_3_0020_00000137.tif"
             },
             "links": [
                 {
                     "rel": "self",
                     "type": "application/geo+json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items/2019_83_36_3_0020_00000137"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items/2019_83_36_3_0020_00000137"
                 },
                 {
                     "rel": "parent",
                     "type": "application/json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019"
                 },
                 {
                     "rel": "collection",
                     "type": "application/json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019"
                 },
                 {
                     "rel": "root",
                     "type": "application/json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
                 },
                 {
                     "rel": "license",
                     "href": "https://dataforsyningen.dk/Vilkaar",
                     "type": "text/html; charset=UTF-8",
                     "title": "KDS license terms"
-                },
-                {
-                    "rel": "alternate",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/viewer.html?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2019%2F10km_613_58%2F1km_6138_588%2F2019_83_36_3_0020_00000137.tif",
-                    "type": "text/html; charset=UTF-8",
-                    "title": "Interactive image viewer"
                 }
             ],
             "assets": {
@@ -1463,14 +1417,6 @@ Content-Type: application/geo+json
                         "data"
                     ],
                     "title": "Raw tiff file"
-                },
-                "thumbnail": {
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2019%2F10km_613_58%2F1km_6138_588%2F2019_83_36_3_0020_00000137.tif",
-                    "type": "image/jpeg",
-                    "roles": [
-                        "thumbnail"
-                    ],
-                    "title": "Thumbnail"
                 }
             },
             "crs": {
@@ -1485,13 +1431,13 @@ Content-Type: application/geo+json
         {
             "rel": "self",
             "type": "application/geo+json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search?limit=1&bbox=10.3285%2C55.3556%2C10.4536%2C55.4132&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FOGC%2F1.3%2FCRS84",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search?limit=1&bbox=10.3285%2C55.3556%2C10.4536%2C55.4132&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FOGC%2F1.3%2FCRS84",
             "method": "GET"
         },
         {
             "rel": "next",
             "type": "application/geo+json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search?limit=1&bbox=10.3285%2C55.3556%2C10.4536%2C55.4132&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FOGC%2F1.3%2FCRS84&pt=PmY6MC4wMDA0MzI3MDg3NTE1NTE4NTE1fmR0OjIwMTktMDUtMTQgMTA6MDg6MDArMDI6MDB-czoyMDE5XzgzXzM2XzNfMDAyMF8wMDAwMDEzNw%3D%3D",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search?limit=1&bbox=10.3285%2C55.3556%2C10.4536%2C55.4132&bbox-crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FOGC%2F1.3%2FCRS84&pt=PmY6MC4wMDA0MzI3MDg3NTE1NTE4NTE1fmR0OjIwMTktMDUtMTQgMTA6MDg6MDArMDI6MDB-czoyMDE5XzgzXzM2XzNfMDAyMF8wMDAwMDEzNw%3D%3D",
             "method": "GET"
         }
     ],
@@ -1506,7 +1452,7 @@ Content-Type: application/geo+json
 > Code samples
 
 ```http
-POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search HTTP/1.1
+POST https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search HTTP/1.1
 token: {{token}}
 Content-Type: application/geo+json
 
@@ -1638,41 +1584,34 @@ Content-Type: application/geo+json
                         8578.0
                     ]
                 },
-                "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2019/10km_613_58/1km_6138_588/2019_83_36_3_0020_00000137.tif",
-                "asset:thumbnail": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2019%2F10km_613_58%2F1km_6138_588%2F2019_83_36_3_0020_00000137.tif"
+                "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2019/10km_613_58/1km_6138_588/2019_83_36_3_0020_00000137.tif"
             },
             "links": [
                 {
                     "rel": "self",
                     "type": "application/geo+json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019/items/2019_83_36_3_0020_00000137"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019/items/2019_83_36_3_0020_00000137"
                 },
                 {
                     "rel": "parent",
                     "type": "application/json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019"
                 },
                 {
                     "rel": "collection",
                     "type": "application/json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/collections/skraafotos2019"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2019"
                 },
                 {
                     "rel": "root",
                     "type": "application/json",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/"
+                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
                 },
                 {
                     "rel": "license",
                     "href": "https://dataforsyningen.dk/Vilkaar",
                     "type": "text/html; charset=UTF-8",
                     "title": "KDS license terms"
-                },
-                {
-                    "rel": "alternate",
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/viewer.html?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2019%2F10km_613_58%2F1km_6138_588%2F2019_83_36_3_0020_00000137.tif",
-                    "type": "text/html; charset=UTF-8",
-                    "title": "Interactive image viewer"
                 }
             ],
             "assets": {
@@ -1683,14 +1622,6 @@ Content-Type: application/geo+json
                         "data"
                     ],
                     "title": "Raw tiff file"
-                },
-                "thumbnail": {
-                    "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2019%2F10km_613_58%2F1km_6138_588%2F2019_83_36_3_0020_00000137.tif",
-                    "type": "image/jpeg",
-                    "roles": [
-                        "thumbnail"
-                    ],
-                    "title": "Thumbnail"
                 }
             },
             "crs": {
@@ -1705,7 +1636,7 @@ Content-Type: application/geo+json
         {
             "rel": "self",
             "type": "application/geo+json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search",
             "method": "POST",
             "body": {
                 "bbox": [
@@ -1722,7 +1653,7 @@ Content-Type: application/geo+json
         {
             "rel": "next",
             "type": "application/geo+json",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2.0/search",
+            "href": "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/search",
             "method": "POST",
             "body": {
                 "bbox": [
