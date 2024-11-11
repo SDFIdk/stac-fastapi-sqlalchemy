@@ -85,8 +85,8 @@ class ItemSerializer(Serializer):
         item_id = db_model.id
         collection_id = db_model.collection_id
         item_links = ItemLinks(
-            #collection_id=collection_id, item_id=item_id, base_url=base_url
             collection_id=collection_id, item_id=item_id, href_builder=hrefbuilder
+            # collection_id=collection_id, item_id=item_id, base_url=base_url
         ).create_links()
 
         token_param = {"token": hrefbuilder.token} if hrefbuilder.token else {}
@@ -94,21 +94,13 @@ class ItemSerializer(Serializer):
         tiler_params = {"url": db_model.data_path, **token_param}
 
         # We don't save the links in the database, but create them on the fly
-        #db_links = db_model.links
+        # db_links = db_model.links
         add_links = [
             {
                 "rel": "license",
                 "href": "https://kds.dk/om-os/vilkaar-og-priser",
                 "type": "text/html; charset=UTF-8",
                 "title": "KDS license terms",
-            },
-            {
-                "rel": "alternate",
-                "href": _add_query_params(
-                    f"{settings.cogtiler_basepath}/viewer.html", tiler_params
-                ),
-                "type": "text/html; charset=UTF-8",
-                "title": "Interactive image viewer",
             },
         ]
 
@@ -133,21 +125,13 @@ class ItemSerializer(Serializer):
                 "roles": ["data"],
                 "title": "Raw tiff file",
             },
-            "thumbnail": {
-                "href": _add_query_params(
-                    f"{settings.cogtiler_basepath}/thumbnail.jpg", tiler_params
-                ),
-                "type": "image/jpeg",
-                "roles": ["thumbnail"],
-                "title": "Thumbnail",
-            },
         }
 
         # The custom geometry we are using emits geojson if the geometry is bound to the database
         # Otherwise it will return a geoalchemy2 WKBElement
         # TODO: It's probably best to just remove the custom geometry type
         # Geometry is named footprint in the database
-        #geometry = db_model.geometry
+        # geometry = db_model.geometry
         geometry = db_model.footprint
         if isinstance(geometry, ga.elements.WKBElement):
             geometry = ga.shape.to_shape(geometry).__geo_interface__
@@ -215,12 +199,12 @@ class ItemSerializer(Serializer):
         }
 
         # Simple OGC API Features clients do not support "assets". Copy most important to the properties collection
-        for copy_asset in ["data", "thumbnail"]:
+        for copy_asset in ["data"]:
             properties[f"asset:{copy_asset}"] = assets[copy_asset]["href"]
 
         return stac_types.Item(
             type="Feature",
-            #stac_version=db_model.stac_version,
+            # stac_version=db_model.stac_version,
             stac_version="1.0.0",
             stac_extensions=stac_extensions,
             id=db_model.id,
@@ -229,7 +213,7 @@ class ItemSerializer(Serializer):
             bbox=bbox,
             properties=properties,
             links=item_links,
-            #assets=db_model.assets,
+            # assets=db_model.assets,
             assets=assets,
         )
 
@@ -274,17 +258,17 @@ class CollectionSerializer(Serializer):
     """Serialization methods for STAC collections."""
 
     @classmethod
-    #def db_to_stac(cls, db_model: database.Collection, base_url: str) -> TypedDict:
     def db_to_stac(cls, db_model: database.Collection, hrefbuilder: ApiTokenHrefBuilder) -> TypedDict:
+    # def db_to_stac(cls, db_model: database.Collection, base_url: str) -> TypedDict:
         """Transform database model to stac collection."""
         collection_links = CollectionLinks(
-            #collection_id=db_model.id, base_url=base_url
             collection_id=db_model.id, href_builder=hrefbuilder
+            # collection_id=db_model.id, base_url=base_url
         ).create_links()
 
         db_links = db_model.links
         if db_links:
-            #collection_links += resolve_links(db_links, base_url)
+            # collection_links += resolve_links(db_links, base_url)
             collection_links += resolve_links(db_links, hrefbuilder.base_url)
 
         stac_extensions = db_model.stac_extensions or []

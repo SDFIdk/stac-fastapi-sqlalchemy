@@ -111,7 +111,6 @@
             ]
         },
         "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2021/10km_618_49/1km_6187_492/2021_82_20_1_0001_00005355.tif",
-        "asset:thumbnail": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2021%2F10km_618_49%2F1km_6187_492%2F2021_82_20_1_0001_00005355.tif",
         "crs": {
             "type": "name",
             "properties": {
@@ -145,12 +144,6 @@
             "href": "https://kds.dk/om-os/vilkaar-og-priser",
             "type": "text/html; charset=UTF-8",
             "title": "KDS license terms"
-        },
-        {
-            "rel": "alternate",
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/viewer.html?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2021%2F10km_618_49%2F1km_6187_492%2F2021_82_20_1_0001_00005355.tif",
-            "type": "text/html; charset=UTF-8",
-            "title": "Interactive image viewer"
         }
     ],
     "assets": {
@@ -161,14 +154,6 @@
                 "data"
             ],
             "title": "Raw tiff file"
-        },
-        "thumbnail": {
-            "href": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2021%2F10km_618_49%2F1km_6187_492%2F2021_82_20_1_0001_00005355.tif",
-            "type": "image/jpeg",
-            "roles": [
-                "thumbnail"
-            ],
-            "title": "Thumbnail"
         }
     }
 }

@@ -14,6 +14,7 @@ import pytest
 import pystac
 from pydantic.datetime_parse import parse_datetime
 from shapely.geometry import shape
+
 # from shapely.geometry import Polygon
 from stac_fastapi.types.core import LandingPageMixin
 from stac_fastapi.types.rfc3339 import datetime_to_str, rfc3339_str_to_datetime
@@ -748,7 +749,10 @@ def test_item_search_properties_field(app_client):
     for response in resp_json["features"]:
         assert response["properties"]["gsd"] == 0.075
 
-    params = {"filter-lang": "cql-json", "filter": {"eq": [{"property": "direction"}, "south"]}}
+    params = {
+        "filter-lang": "cql-json",
+        "filter": {"eq": [{"property": "direction"}, "south"]},
+    }
 
     resp = app_client.post("/search", json=params)
     assert resp.status_code == 200
@@ -815,10 +819,7 @@ def test_item_search_get_filter_extension(app_client, load_test_data):
     assert resp.status_code == 200
     resp_json = resp.json()
     assert resp_json["context"]["returned"] >= 2
-    assert (
-        resp_json["features"][0]["properties"]["gsd"]
-        == test_item["properties"]["gsd"]
-    )
+    assert resp_json["features"][0]["properties"]["gsd"] == test_item["properties"]["gsd"]
 
 
 def test_item_search_pagination(app_client, load_test_data):
@@ -957,10 +958,10 @@ def test_pagination_post(app_client, load_test_data):
     assert not set(item_ids) - set(ids)
 
 
-#def test_pagination_token_idempotent(app_client, load_test_data):
+# def test_pagination_token_idempotent(app_client, load_test_data):
 def test_pagination_token_idempotent(app_client):
     """Test that pagination tokens are idempotent (paging extension)"""
-    #test_item = load_test_data("test_item.json")
+    # test_item = load_test_data("test_item.json")
     # ids = []
     ids = [
         "2017_82_20_4_2031_00030536",
@@ -1095,7 +1096,10 @@ def test_search_intersects_and_bbox(load_test_data, app_client):
     resp = app_client.post("/search", json=params)
     assert resp.status_code == 400
     resp_json = resp.json()
-    assert "[{'loc': ('body', 'intersects'), 'msg': 'intersects and bbox parameters are mutually exclusive', 'type': 'value_error'}]" in resp_json["description"]
+    assert (
+        "[{'loc': ('body', 'intersects'), 'msg': 'intersects and bbox parameters are mutually exclusive', 'type': 'value_error'}]"
+        in resp_json["description"]
+    )
 
     get_params = {
         "intersects": orjson.dumps(params["intersects"]).decode("utf-8"),
@@ -1106,7 +1110,10 @@ def test_search_intersects_and_bbox(load_test_data, app_client):
     resp = app_client.get("/search", params=get_params)
     assert resp.status_code == 400
     resp_json = resp.json()
-    assert "1 validation error for SearchPostRequest\nintersects\n  intersects and bbox parameters are mutually exclusive (type=value_error)" in resp_json["description"]
+    assert (
+        "1 validation error for SearchPostRequest\nintersects\n  intersects and bbox parameters are mutually exclusive (type=value_error)"
+        in resp_json["description"]
+    )
 
 
 def test_get_missing_item(app_client, load_test_data):
@@ -1185,7 +1192,6 @@ def test_item_search_cql_or(app_client, load_test_data):
 
 
 def test_item_search_cql_not(app_client):
-
     body = {
         "filter-lang": "cql-json",
         "filter": {"not": {"lt": [{"property": "gsd"}, 100]}},
@@ -1197,7 +1203,6 @@ def test_item_search_cql_not(app_client):
 
 
 def test_item_search_cql_isNull(app_client):
-
     body = {"filter-lang": "cql-json", "filter": {"isNull": {"property": "id"}}}
     resp = app_client.post("/search", json=body)
     assert resp.status_code == 200
@@ -1233,7 +1238,10 @@ def test_item_search_cql_invalid_operation(app_client):
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "Unable to parse expression node {'invalid_op': [{'property': 'gsd'}, 1]}"
+    assert (
+        resp_json["description"]
+        == "Unable to parse expression node {'invalid_op': [{'property': 'gsd'}, 1]}"
+    )
 
 
 def test_item_search_invalid_filter_lang(app_client):
@@ -1246,7 +1254,10 @@ def test_item_search_invalid_filter_lang(app_client):
 
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "[{'loc': ('body', 'filter-lang'), 'msg': \"value is not a valid enumeration member; permitted: 'cql-json'\", 'type': 'type_error.enum', 'ctx': {'enum_values': [<FilterLang.cql_json: 'cql-json'>]}}]"
+    assert (
+        resp_json["description"]
+        == "[{'loc': ('body', 'filter-lang'), 'msg': \"value is not a valid enumeration member; permitted: 'cql-json'\", 'type': 'type_error.enum', 'ctx': {'enum_values': [<FilterLang.cql_json: 'cql-json'>]}}]"
+    )
 
 
 def test_item_search_invalid_filter_crs(app_client):
@@ -1259,7 +1270,10 @@ def test_item_search_invalid_filter_crs(app_client):
 
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "[{'loc': ('body', 'filter-crs'), 'msg': \"unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'\", 'type': 'value_error.const', 'ctx': {'given': 'invalid-crs', 'permitted': ('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832')}}]"
+    assert (
+        resp_json["description"]
+        == "[{'loc': ('body', 'filter-crs'), 'msg': \"unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'\", 'type': 'value_error.const', 'ctx': {'given': 'invalid-crs', 'permitted': ('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832')}}]"
+    )
 
 
 def test_search_bbox_errors(app_client):
@@ -1269,7 +1283,10 @@ def test_search_bbox_errors(app_client):
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "[{'loc': ('body', 'bbox'), 'msg': 'not enough values to unpack (expected 6, got 1)', 'type': 'value_error'}]"
+    assert (
+        resp_json["description"]
+        == "[{'loc': ('body', 'bbox'), 'msg': 'not enough values to unpack (expected 6, got 1)', 'type': 'value_error'}]"
+    )
 
     # 3D bounding box is allowed
     # body = {"query": {"bbox": [100.0, 0.0, 0.0, 105.0, 1.0, 1.0]}}
@@ -1281,10 +1298,15 @@ def test_search_bbox_errors(app_client):
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "1 validation error for SearchPostRequest\nbbox\n  Maximum longitude must be greater than minimum longitude (type=value_error)"
+    assert (
+        resp_json["description"]
+        == "1 validation error for SearchPostRequest\nbbox\n  Maximum longitude must be greater than minimum longitude (type=value_error)"
+    )
 
 
-def test_filter_crs_in_epsg25832_should_not_affect_bbox_in_epsg4326(app_client, load_test_data):
+def test_filter_crs_in_epsg25832_should_not_affect_bbox_in_epsg4326(
+    app_client, load_test_data
+):
     """Test that bbox is unaffected of filter-crs params if filter-params is specified and result is in http://www.opengis.net/def/crs/OGC/1.3/CRS84 (crsExtension)"""
     test_item = load_test_data("test_item.json")
     params = {
@@ -1300,9 +1322,9 @@ def test_filter_crs_in_epsg25832_should_not_affect_bbox_in_epsg4326(app_client, 
     assert resp_json["features"][0]["id"] == test_item["id"]
     assert (
         resp_json["features"][0]["crs"]["properties"]["name"]
-       == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
+        == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
     )
-    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"    
+    assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
 
 
 def test_crs_epsg25832(app_client):
@@ -1364,7 +1386,9 @@ def test_filter_crs_epsg4326(app_client, load_test_data):
     matching_feat = [x for x in resp_json["features"] if x["id"] == test_item["id"]]
     assert len(matching_feat) == 1
     # Is the geometry "almost" the same. (Which is good enough for this assesment)
-    assert shape(matching_feat[0]["geometry"]).equals_exact(shape(test_item["geometry"]), 1e-6)
+    assert shape(matching_feat[0]["geometry"]).equals_exact(
+        shape(test_item["geometry"]), 1e-6
+    )
     assert (
         resp_json["features"][0]["crs"]["properties"]["name"]
         == "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
@@ -1403,13 +1427,13 @@ def test_filter_crs_epsg25832(app_client, load_test_data):
                     "type": "Polygon",
                     "coordinates": [
                         [
-                            [491947.05803559424,6187696.446854165],
-                            [494005.4428012192,6187704.692947916],
-                            [494008.1595980942,6186303.810135417],
-                            [491957.0150668442,6186293.536697917],
-                            [491947.05803559424,6187696.446854165]
+                            [491947.05803559424, 6187696.446854165],
+                            [494005.4428012192, 6187704.692947916],
+                            [494008.1595980942, 6186303.810135417],
+                            [491957.0150668442, 6186293.536697917],
+                            [491947.05803559424, 6187696.446854165],
                         ]
-                    ]
+                    ],
                 },
             ]
         },
@@ -1444,11 +1468,11 @@ def test_filter_get_crs_epsg25832(app_client, load_test_data):
                         "type": "Polygon",
                         "coordinates": [
                             [
-                                [491947.05803559424,6187696.446854165],
-                                [494005.4428012192,6187704.692947916],
-                                [494008.1595980942,6186303.810135417],
-                                [491957.0150668442,6186293.536697917],
-                                [491947.05803559424,6187696.446854165]
+                                [491947.05803559424, 6187696.446854165],
+                                [494005.4428012192, 6187704.692947916],
+                                [494008.1595980942, 6186303.810135417],
+                                [491957.0150668442, 6186293.536697917],
+                                [491947.05803559424, 6187696.446854165],
                             ]
                         ],
                     },
@@ -1487,7 +1511,12 @@ def test_single_item_get_bbox_with_bbox_crs(app_client, load_test_data):
     resp_json = resp.json()
     # TODO rewrite assertion. It could check if response json bbox actually is changed to the correct converted bbox
     assert resp_json["bbox"] != test_item["bbox"]
-    assert resp_json["bbox"] == [491947.05803559424, 6186293.536697917, 494008.1595980942, 6187704.692947916]
+    assert resp_json["bbox"] == [
+        491947.05803559424,
+        6186293.536697917,
+        494008.1595980942,
+        6187704.692947916,
+    ]
     assert resp.headers["content-crs"] == "http://www.opengis.net/def/crs/EPSG/0/25832"
 
 
@@ -1499,9 +1528,7 @@ def test_collection_item_get_bbox_with_bbox_crs(app_client, load_test_data):
         "crs": "http://www.opengis.net/def/crs/EPSG/0/25832",
         "limit": 200,
     }
-    resp = app_client.get(
-        f'/collections/{test_item["collection"]}/items', params=params
-    )
+    resp = app_client.get(f'/collections/{test_item["collection"]}/items', params=params)
     assert resp.status_code == 200
 
     resp_json = resp.json()
@@ -1525,9 +1552,7 @@ def test_single_item_get_bbox_crs_with_crs(app_client, load_test_data):
         "bbox": ",".join([str(coord) for coord in bbox]),
         "bbox-crs": "http://www.opengis.net/def/crs/EPSG/0/25832",
     }
-    resp = app_client.get(
-        f'/collections/{test_item["collection"]}/items', params=params
-    )
+    resp = app_client.get(f'/collections/{test_item["collection"]}/items', params=params)
     assert resp.status_code == 200
 
     resp_json = resp.json()
@@ -1545,9 +1570,7 @@ def test_item_search_bbox_crs_with_crs(app_client, load_test_data):
         "crs": "http://www.opengis.net/def/crs/EPSG/0/25832",
         "limit": 10,
     }
-    resp = app_client.get(
-        f'/collections/{test_item["collection"]}/items', params=params
-    )
+    resp = app_client.get(f'/collections/{test_item["collection"]}/items', params=params)
     assert resp.status_code == 200
 
     resp_json = resp.json()
@@ -1631,7 +1654,10 @@ def test_item_wrong_crs(app_client, load_test_data):
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "[{'loc': ('body', 'crs'), 'msg': \"unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'\", 'type': 'value_error.const', 'ctx': {'given': 'wrong-crs', 'permitted': ('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832')}}]"
+    assert (
+        resp_json["description"]
+        == "[{'loc': ('body', 'crs'), 'msg': \"unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'\", 'type': 'value_error.const', 'ctx': {'given': 'wrong-crs', 'permitted': ('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832')}}]"
+    )
 
     """Test get with default bbox, response should be an error defining what supported that is crs(crsExtension)"""
     params = {
@@ -1640,28 +1666,35 @@ def test_item_wrong_crs(app_client, load_test_data):
         "crs": "wrong-crs",
         "limit": 1,
     }
-    
-    resp = app_client.get(f'/search', params=params)
+
+    resp = app_client.get(f"/search", params=params)
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "1 validation error for SearchPostRequest\ncrs\n  unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832' (type=value_error.const; given=wrong-crs; permitted=('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'))"
-    
-    resp = app_client.get(
-        f'/collections/{test_item["collection"]}/items', params=params
+    assert (
+        resp_json["description"]
+        == "1 validation error for SearchPostRequest\ncrs\n  unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832' (type=value_error.const; given=wrong-crs; permitted=('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'))"
     )
+
+    resp = app_client.get(f'/collections/{test_item["collection"]}/items', params=params)
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "CRS provided for argument crs is invalid, valid options are: http://www.opengis.net/def/crs/OGC/1.3/CRS84, http://www.opengis.net/def/crs/EPSG/0/25832"
-    
+    assert (
+        resp_json["description"]
+        == "CRS provided for argument crs is invalid, valid options are: http://www.opengis.net/def/crs/OGC/1.3/CRS84, http://www.opengis.net/def/crs/EPSG/0/25832"
+    )
+
     resp = app_client.get(
         f"/collections/{test_item['collection']}/items/{test_item['id']}", params=params
     )
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "CRS provided for argument crs is invalid, valid options are: http://www.opengis.net/def/crs/OGC/1.3/CRS84, http://www.opengis.net/def/crs/EPSG/0/25832"
+    assert (
+        resp_json["description"]
+        == "CRS provided for argument crs is invalid, valid options are: http://www.opengis.net/def/crs/OGC/1.3/CRS84, http://www.opengis.net/def/crs/EPSG/0/25832"
+    )
 
 
 def test_item_wrong_bbox_crs(app_client, load_test_data):
@@ -1680,7 +1713,10 @@ def test_item_wrong_bbox_crs(app_client, load_test_data):
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "[{'loc': ('body', 'bbox-crs'), 'msg': \"unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'\", 'type': 'value_error.const', 'ctx': {'given': 'wrong-bbox-crs', 'permitted': ('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832')}}]"
+    assert (
+        resp_json["description"]
+        == "[{'loc': ('body', 'bbox-crs'), 'msg': \"unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'\", 'type': 'value_error.const', 'ctx': {'given': 'wrong-bbox-crs', 'permitted': ('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832')}}]"
+    )
 
     """Test get with default bbox, response should be an error defining what supported that is crs(crsExtension)"""
     params = {
@@ -1690,20 +1726,23 @@ def test_item_wrong_bbox_crs(app_client, load_test_data):
         "limit": 1,
     }
 
-    resp = app_client.get(f'/search', params=params)
+    resp = app_client.get(f"/search", params=params)
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "1 validation error for SearchPostRequest\nbbox-crs\n  unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832' (type=value_error.const; given=wrong-bbox-crs; permitted=('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'))"
-    
-
-    resp = app_client.get(
-        f'/collections/{test_item["collection"]}/items', params=params
+    assert (
+        resp_json["description"]
+        == "1 validation error for SearchPostRequest\nbbox-crs\n  unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832' (type=value_error.const; given=wrong-bbox-crs; permitted=('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'))"
     )
+
+    resp = app_client.get(f'/collections/{test_item["collection"]}/items', params=params)
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
-    assert resp_json["description"] == "CRS provided for argument bbox_crs is invalid, valid options are: http://www.opengis.net/def/crs/OGC/1.3/CRS84, http://www.opengis.net/def/crs/EPSG/0/25832"
+    assert (
+        resp_json["description"]
+        == "CRS provided for argument bbox_crs is invalid, valid options are: http://www.opengis.net/def/crs/OGC/1.3/CRS84, http://www.opengis.net/def/crs/EPSG/0/25832"
+    )
 
 
 @pytest.mark.skip(reason="href_builder can not be initi")
@@ -1775,17 +1814,21 @@ def test_get_item_x_forwarded_headers(app_client, load_test_data):
         headers={
             "X-Forwarded-Proto": "https",
             "X-Forwarded-Host": "api.dataforsyningen.dk",
-            "X-Forwarded-Prefix": "/rest/skraafoto_api/v2/"
+            "X-Forwarded-Prefix": "/rest/skraafoto_api/v2/",
         },
     )
     for link in get_item.json()["links"]:
         # assert link["href"].startswith("https://testserver:1234/")
-        if link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"):
-            assert link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_api/v2/")
+        if link["href"].startswith(
+            "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
+        ):
+            assert link["href"].startswith(
+                "https://api.dataforsyningen.dk/rest/skraafoto_api/v2/"
+            )
         elif link["href"].startswith("https://cdn.dataforsyningen.dk/skraafoto_server/"):
-            assert link["href"].startswith("https://cdn.dataforsyningen.dk/skraafoto_server/")
-        elif link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_cogtiler"):
-            assert link["href"].startswith("https://api.dataforsyningen.dk/rest/skraafoto_cogtiler")
+            assert link["href"].startswith(
+                "https://cdn.dataforsyningen.dk/skraafoto_server/"
+            )
         else:
             # We have a license URL that does not start with the same host as the rest of the URL's
             assert link["href"].startswith("https://kds.dk")
