@@ -883,16 +883,14 @@ Guiden er en hurtig gennemgang af, hvordan man får skråfotos for et bestemt ge
 
 <table class="center" style="width:100%">
   <tr>
-     <th>For klienter med understøttelse af COGs</th>
-     <th>Klienter UDEN COG support</th>
+     <th>Sammenspillet mellem de to API'er</th>
   </tr>
   <tr>
-    <td><img src="https://raw.githubusercontent.com/SDFIdk/stac-fastapi-sqlalchemy/main/media/Skr%C3%A5fotodistribution-HTTPServer.svg" alt="For klienter med understøttelse af COGs" width="300px"></td>
-    <td><img src="https://raw.githubusercontent.com/SDFIdk/stac-fastapi-sqlalchemy/main/media/Skr%C3%A5fotodistribution-TileServer.svg" alt="Klienter UDEN COG support" width="300px"></td>
+    <td><img src="https://raw.githubusercontent.com/SDFIdk/stac-fastapi-sqlalchemy/main/media/Skr%C3%A5fotodistribution-HTTPServer.svg" alt="Sammenspillet mellem de to API'er" width="300px"></td>
   </tr>
  </table>
 
-#### Eksempel 1
+#### Eksempel
 
 Hent en COG fra Skåfoto Server og vis billedet med Open Layer
 
