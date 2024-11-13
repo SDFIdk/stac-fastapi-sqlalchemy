@@ -821,39 +821,11 @@ Relevante links findes i sektionen `links` hhv `assets`, kan ses ude til højre 
 
 Det originale flyfoto i fuld opløsning kan downloades på den URL, der findes i metadata under `/assets/data/href`. Formatet er kompatibelt med almindelige TIFF-læsere og det downloadede billede kan dermed åbnes af de fleste gængse billedprogrammer.
 
-**Thumbnail**
-
-En thumbnail af flyfotoet kan hentes på den URL, der findes i metadata under `/assets/thumbnail/href`.
-
-Der gives ingen garantier vedrørende dimensionerne af thumbnails. Pt er alle thumbnails mindre end 512px.
-
 **Cloud Optimized Geotiff**
 
 Det originale flyfoto, hvis URL findes under `/assets/data/href`, er i "Cloud Optimized GeoTIFF" format og kan dermed tilgås meget effektivt direkte på http-serveren.
 
 Læs mere på [www.cogeo.org](https://www.cogeo.org/).
-
-**Viewer**
-
-<mark>Denne viewer bliver lukket den 1. april 2025.</mark>
-
-_Skraafoto STAC v2 har ikke disse links, følgende information er kun gældende for Skraafoto STAC v1.0._
-
-Dataforsyningen udstiller en online-viewer til meget enkel visning af et flyfoto i en browser. URLen til denne viewer findes i metadata under `/links/` med `rel=alternate` og `type=text/html; charset=UTF-8`.
-
-**JPEG tiles**
-
-Dataforsyningen udstiller en service, der kan udstille et flyfoto som en pyramide af jpeg-tiles. Disse kan anvendes, såfremt klienten ikke er i stand til at anvende den "Cloud Optimized GeoTIFF" direkte, som beskrevet ovenfor.
-
-URL til denne service er ikke inkluderet i metadata, men må i stedet konstrueres. URL'en skal konstrueres som:
-
-`https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/tiles/{z}/{x}/{y}.jpg?url={DOWNLOAD_URL}`
-
-Tile-koordinaterne z, x, og y er i en lokal tile-pyramide.
-
-Basal info om tile-pyramiden kan fås på endpointet:
-
-`https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/info?url={DOWNLOAD_URL}`
 
 ## Georeferering
 
@@ -904,11 +876,10 @@ Eller formuleret på matrixform:
 
 Guiden er en hurtig gennemgang af, hvordan man får skråfotos for et bestemt geografisk område ved hjælp af koordinater.
 
-### Sammenspillet mellem de tre API'er
+### Sammenspillet mellem de to API'er
 
 - **Skåfoto STAC API** leverer metadata om skråfotos. Dens URL starter med `https://api.dataforsyningen.dk/rest/skraafoto_api/v2`, men for at bruge URL'en er det et krav, at der bliver specificeret paths og query parameters.
 - **Skåfoto Server** leverer skråfotos som [Cloud Optimized Geotiff](https://www.cogeo.org) (`COG`), hvor der kan bruges range request. Dens URL starter med `https://cdn.dataforsyningen.dk/skraafoto_server`, men for at bruge URL'en er det et krav, at der bliver specificeret paths og query parameters.
-- **Skråfoto Cogtiler** oversætter COG-formatet til JPG, der ikke understøtter COG, se mere i afsnittet [Download og visning af billeder](#download-og-visning-af-billeder). Dens URL starter med `https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0`, men for at bruge URL'en er det et krav, at der bliver specificeret paths og query parameters. Cogtilers openapi dokumentation findes [her](#skraafoto_cogtiler).
 
 <table class="center" style="width:100%">
   <tr>
@@ -968,66 +939,6 @@ Hent en COG fra Skåfoto Server og vis billedet med Open Layer
                 projection: projection
             }))
         });
-    </script>
-  </body>
-</html>
-```
-
-#### Eksempel 2
-
-Hente metadata om et bestemt skråfoto, for så at få vist selve billedet ved brug af Skråfoto STAC API og Skråfoto Cogtiler
-
-```html
-<!DOCTYPE html>
-<html>
-  <body>
-    <img id="jpgImage" src="">
-    <script>
-      const fetchMetadaPromise = new Promise((resolve, reject) => {
-        // Get metadata about a specific item using Skråfoto STAC API
-        fetch('https://api.dataforsyningen.dk/rest/skraafoto_api/v2/collections/skraafotos2021/items/2021_83_36_4_0008_00004522', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/geo+json',
-            'token': '{}'
-          }
-        })
-          .then((response) => {
-            if (!response.ok){
-              throw new Error('Network response was not OK');
-            }
-            // If response is empty then return empty json
-            resolve(response?.json() || {});
-          })
-        });
-
-      const fetchThumbnailPromise = new Promise((resolve, reject) => {
-        fetchMetadaPromise.then((jsonData) => {
-        // Get the thumbnail image from the item using Skråfoto Cogtiler
-        fetch(jsonData.assets.thumbnail.href, {
-            method: 'GET',
-            headers: {
-              'token': '{}'
-            }
-          })
-          .then((response) => {
-            if (!response.ok){
-              throw new Error('Network response was not OK');
-            }
-            // Blob is raw data
-            resolve(response.blob());
-          })
-        });
-      });
-
-      // Be sure that the DOM has loaded before the image get populated
-      window.addEventListener('DOMContentLoaded', () => {
-        fetchThumbnailPromise.then((imageSrc) => {
-        const objectURL = URL.createObjectURL(imageSrc);
-        let image = document.querySelector("#jpgImage");
-        image.src = objectURL;
-        });
-      });
     </script>
   </body>
 </html>
@@ -1174,8 +1085,7 @@ Content-Type: application/geo+json
                         8578.0
                     ]
                 },
-                "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2019/10km_613_58/1km_6138_588/2019_83_36_3_0020_00000137.tif",
-                "asset:thumbnail": "https://api.dataforsyningen.dk/rest/skraafoto_cogtiler/v1.0/thumbnail.jpg?url=https%3A%2F%2Fcdn.dataforsyningen.dk%2Fskraafoto_server%2FCOG_oblique_2019%2F10km_613_58%2F1km_6138_588%2F2019_83_36_3_0020_00000137.tif"
+                "asset:data": "https://cdn.dataforsyningen.dk/skraafoto_server/COG_oblique_2019/10km_613_58/1km_6138_588/2019_83_36_3_0020_00000137.tif"
             },
             "links": [
                 {
