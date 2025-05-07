@@ -1,4 +1,23 @@
-# Skraafoto STAC API - Dokumentation
+# Skraafoto STAC API v2 - Dokumentation
+
+<h2 id="skraafoto-breaking-changes">Breaking changes!</h2>
+
+Det nye Skråfoto STAC v2 endpoint: https://api.dataforsyningen.dk/skraafoto_api/v2
+
+Breaking changes for alle endpoints hvor request BBOX kan bruges:
+- Bbox skal være 4 punkter.
+
+Breaking changes for GET "/collections/:collectionId/items/:itemId", GET "/collections/:collectionId/items", GET "/search" og POST "/search" i Image `response json` da Skråfoto COG Tiler lukkes:
+- fjernet `"asset:thumbnail"`
+- fjernet `"link.rel"` som har titlen: `"Interactive image viewer"` 
+- fjernet `"assets.thumbnail"`
+
+Breaking changes for GET "/collections/{collection_id}/items":
+- fjernet request parameter `ids`
+
+Fixed for GET "/collections/{collection_id}/items":
+- Request parameteren `bbox_crs` kan bruges
+- Request parametre `bbox` og `filter` kan bruges samtidigt
 
 <h2 id="skraafoto-introduktion">Introduktion</h2>
 
