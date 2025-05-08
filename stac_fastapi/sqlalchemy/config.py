@@ -22,6 +22,8 @@ class SqlalchemySettings(ApiSettings):
     postgres_host_writer: str
     postgres_port: str
     postgres_dbname: str
+    connect_args={"options": "-c statement_timeout=10000"}
+
 
     # Fields which are defined by STAC but not included in the database model
     forbidden_fields: Set[str] = {"type"}

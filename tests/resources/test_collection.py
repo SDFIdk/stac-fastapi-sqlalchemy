@@ -1,6 +1,8 @@
+import pytest
 import pystac
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_and_delete_collection(app_client, load_test_data):
     """Test creation and deletion of a collection"""
     test_collection = load_test_data("test_collection.json")
@@ -13,6 +15,7 @@ def test_create_and_delete_collection(app_client, load_test_data):
     assert resp.status_code == 200
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_create_collection_conflict(app_client, load_test_data):
     """Test creation of a collection which already exists"""
     # This collection ID is created in the fixture, so this should be a conflict
@@ -21,12 +24,14 @@ def test_create_collection_conflict(app_client, load_test_data):
     assert resp.status_code == 409
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_delete_missing_collection(app_client):
     """Test deletion of a collection which does not exist"""
     resp = app_client.delete("/collections/missing-collection")
     assert resp.status_code == 404
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_update_collection_already_exists(app_client, load_test_data):
     """Test updating a collection which already exists"""
     test_collection = load_test_data("test_collection.json")
@@ -40,6 +45,7 @@ def test_update_collection_already_exists(app_client, load_test_data):
     assert "test" in resp_json["keywords"]
 
 
+@pytest.mark.skip(reason="Database is readonly")
 def test_update_new_collection(app_client, load_test_data):
     """Test updating a collection which does not exist (same as creation)"""
     test_collection = load_test_data("test_collection.json")
@@ -53,13 +59,54 @@ def test_collection_not_found(app_client):
     """Test read a collection which does not exist"""
     resp = app_client.get("/collections/does-not-exist")
     assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Collection does-not-exist not found"
 
+def test_collection_items_collectionid_not_found(app_client, load_test_data):
+    """Test read an item with a collectionId that does not exist"""
+    test_collection = load_test_data("test_collection.json")
+    test_item = load_test_data("test_item.json")
+
+    # Test that we get a 404 if the collectionId does not exist
+    resp = app_client.get(f"/collections/does-not-exist/items")
+    assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Collection does-not-exist not found"
+
+    # Test that we get a 404 if the itemId does not exist but the collectionId does
+    resp = app_client.get(f"/collections/{test_collection['id']}/items/does-not-exist")
+    assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Item does-not-exist not found"
+
+    # Test that we get a 404 if the collectionId does not exist but the itemId does
+    resp = app_client.get(f"/collections/does-not-exist/items/{test_item['id']}")
+    assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Item 2021_82_20_1_0001_00005355 not found"
+
+    # Test that we get a 404 if neither the itemId or the collectionId exists
+    resp = app_client.get(f"/collections/does-not-exist/items/also-does-not-exist")
+    assert resp.status_code == 404
+    resp_json = resp.json()
+    assert resp_json["code"] == "NotFoundError"
+    assert resp_json["description"] == "Item also-does-not-exist not found"
+
+    ## finally check that we get the item if both exists
+    resp = app_client.get(
+        f"/collections/{test_collection['id']}/items/{test_item['id']}"
+    )
+    assert resp.status_code == 200
 
 def test_returns_valid_collection(app_client, load_test_data):
     """Test validates fetched collection with jsonschema"""
     test_collection = load_test_data("test_collection.json")
-    resp = app_client.put("/collections", json=test_collection)
-    assert resp.status_code == 200
+    # resp = app_client.put("/collections", json=test_collection)
+    # assert resp.status_code == 200
 
     resp = app_client.get(f"/collections/{test_collection['id']}")
     assert resp.status_code == 200
@@ -84,7 +131,12 @@ def test_get_collection_forwarded_header(app_client, load_test_data):
         headers={"Forwarded": "proto=https;host=testserver:1234"},
     )
     for link in resp.json()["links"]:
-        assert link["href"].startswith("https://testserver:1234/")
+        # assert link["href"].startswith("https://testserver:1234/")
+        if link["href"].startswith("https://testserver:1234/"):
+            assert link["href"].startswith("https://testserver:1234/")
+        else:
+            # We have a license URL that does not start with the same host as the rest of the URL's
+            assert link["href"].startswith("https://www.kds.dk/om-klimadatastyrelsen/vilkaar-og-priser")
 
 
 def test_get_collection_x_forwarded_headers(app_client, load_test_data):
@@ -99,7 +151,12 @@ def test_get_collection_x_forwarded_headers(app_client, load_test_data):
         },
     )
     for link in resp.json()["links"]:
-        assert link["href"].startswith("https://testserver:1234/")
+        # assert link["href"].startswith("https://testserver:1234/")
+        if link["href"].startswith("https://testserver:1234/"):
+            assert link["href"].startswith("https://testserver:1234/")
+        else:
+            # We have a license URL that does not start with the same host as the rest of the URL's
+            assert link["href"].startswith("https://www.kds.dk/om-klimadatastyrelsen/vilkaar-og-priser")
 
 
 def test_get_collection_duplicate_forwarded_headers(app_client, load_test_data):
@@ -115,4 +172,9 @@ def test_get_collection_duplicate_forwarded_headers(app_client, load_test_data):
         },
     )
     for link in resp.json()["links"]:
-        assert link["href"].startswith("https://testserver:1234/")
+        # assert link["href"].startswith("https://testserver:1234/")
+        if link["href"].startswith("https://testserver:1234/"):
+            assert link["href"].startswith("https://testserver:1234/")
+        else:
+            # We have a license URL that does not start with the same host as the rest of the URL's
+            assert link["href"].startswith("https://www.kds.dk/om-klimadatastyrelsen/vilkaar-og-priser")

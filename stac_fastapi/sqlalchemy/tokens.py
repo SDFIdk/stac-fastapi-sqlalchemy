@@ -1,13 +1,13 @@
 """Pagination token client."""
 import abc
 import logging
-import os
-from base64 import urlsafe_b64encode
+# import os
+from base64 import urlsafe_b64encode, urlsafe_b64decode
 from typing import Type
 
 import attr
 from sqlalchemy.orm import Session as SqlSession
-from stac_fastapi.types.errors import DatabaseError
+# from stac_fastapi.types.errors import DatabaseError
 
 from stac_fastapi.sqlalchemy.models import database
 from stac_fastapi.sqlalchemy.session import Session
@@ -32,24 +32,40 @@ class PaginationTokenClient(abc.ABC):
         """Lookup row by id."""
         ...
 
-    def insert_token(self, keyset: str, tries: int = 0) -> str:  # type:ignore
-        """Insert a keyset into the database."""
-        # uid has collision chance of 1e-7 percent
-        uid = urlsafe_b64encode(os.urandom(6)).decode()
-        with self.session.writer.context_session() as session:
-            try:
-                token = database.PaginationToken(id=uid, keyset=keyset)
-                session.add(token)
-                return uid
-            except DatabaseError:
-                # Try again if uid already exists in the database
-                # TODO: Explicitely check for ConflictError (if insert fails for other reasons it should be raised)
-                if tries > 5:
-                    raise
-                self.insert_token(keyset, tries=tries + 1)
+    # def insert_token(self, keyset: str, tries: int = 0) -> str:  # type:ignore
+    #     """Insert a keyset into the database."""
+    #     # uid has collision chance of 1e-7 percent
+    #     uid = urlsafe_b64encode(os.urandom(6)).decode()
+    #     with self.session.writer.context_session() as session:
+    #         try:
+    #             token = database.PaginationToken(id=uid, keyset=keyset)
+    #             session.add(token)
+    #             return uid
+    #         except DatabaseError:
+    #             # Try again if uid already exists in the database
+    #             # TODO: Explicitely check for ConflictError (if insert fails for other reasons it should be raised)
+    #             if tries > 5:
+    #                 raise
+    #             self.insert_token(keyset, tries=tries + 1)
 
-    def get_token(self, token_id: str) -> str:
-        """Retrieve a keyset from the database."""
-        with self.session.reader.context_session() as session:
-            token = self._lookup_id(token_id, self.token_table, session)
-            return token.keyset
+    # def get_token(self, token_id: str) -> str:
+    #     """Retrieve a keyset from the database."""
+    #     with self.session.reader.context_session() as session:
+    #         token = self._lookup_id(token_id, self.token_table, session)
+    #         return token.keyset
+
+    """Pagination token operations."""
+    """
+        We don't have a pagination_token in a table, but we generate it on the fly
+    """
+
+    def to_token(self, keyset: str) -> str:  # type:ignore
+        """Transform a keyset to a token."""
+        # for now just encode the keyset and return it
+        return urlsafe_b64encode(
+            keyset.encode(encoding="utf-8", errors="strict")
+        ).decode("utf-8")
+
+    def from_token(self, token_id: str) -> str:
+        """Transform a token to a keyset."""
+        return urlsafe_b64decode(token_id).decode("utf-8")
