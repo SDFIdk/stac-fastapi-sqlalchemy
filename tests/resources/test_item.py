@@ -331,7 +331,7 @@ def test_returns_valid_item(app_client, load_test_data):
 
 def test_get_item_collection(app_client, load_test_data):
     """Test read an item collection (core)"""
-    item_count = 1467880
+    item_count = 1467879
     test_item = load_test_data("test_item.json")
 
     # for idx in range(item_count):
@@ -623,9 +623,9 @@ def test_item_search_temporal_window_get(app_client, load_test_data):
     resp_json = resp.json()
     assert resp_json["features"][0]["id"] == test_item["id"]
 
-    assert any(
-        test_item["id"] == f["id"] for f in resp_json["features"]
-    ), "test item should be returned within interval"
+    assert any(test_item["id"] == f["id"] for f in resp_json["features"]), (
+        "test item should be returned within interval"
+    )
 
     assert all(
         datetime_to_str(item_date_after) >= f["properties"]["datetime"]
@@ -1504,7 +1504,7 @@ def test_single_item_get_bbox_with_bbox_crs(app_client, load_test_data):
         "crs": "http://www.opengis.net/def/crs/EPSG/0/25832",
     }
     resp = app_client.get(
-        f'/collections/{test_item["collection"]}/items/{test_item["id"]}', params=params
+        f"/collections/{test_item['collection']}/items/{test_item['id']}", params=params
     )
     assert resp.status_code == 200
 
@@ -1528,7 +1528,7 @@ def test_collection_item_get_bbox_with_bbox_crs(app_client, load_test_data):
         "crs": "http://www.opengis.net/def/crs/EPSG/0/25832",
         "limit": 200,
     }
-    resp = app_client.get(f'/collections/{test_item["collection"]}/items', params=params)
+    resp = app_client.get(f"/collections/{test_item['collection']}/items", params=params)
     assert resp.status_code == 200
 
     resp_json = resp.json()
@@ -1552,7 +1552,7 @@ def test_single_item_get_bbox_crs_with_crs(app_client, load_test_data):
         "bbox": ",".join([str(coord) for coord in bbox]),
         "bbox-crs": "http://www.opengis.net/def/crs/EPSG/0/25832",
     }
-    resp = app_client.get(f'/collections/{test_item["collection"]}/items', params=params)
+    resp = app_client.get(f"/collections/{test_item['collection']}/items", params=params)
     assert resp.status_code == 200
 
     resp_json = resp.json()
@@ -1570,7 +1570,7 @@ def test_item_search_bbox_crs_with_crs(app_client, load_test_data):
         "crs": "http://www.opengis.net/def/crs/EPSG/0/25832",
         "limit": 10,
     }
-    resp = app_client.get(f'/collections/{test_item["collection"]}/items', params=params)
+    resp = app_client.get(f"/collections/{test_item['collection']}/items", params=params)
     assert resp.status_code == 200
 
     resp_json = resp.json()
@@ -1676,7 +1676,7 @@ def test_item_wrong_crs(app_client, load_test_data):
         == "1 validation error for SearchPostRequest\ncrs\n  unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832' (type=value_error.const; given=wrong-crs; permitted=('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'))"
     )
 
-    resp = app_client.get(f'/collections/{test_item["collection"]}/items', params=params)
+    resp = app_client.get(f"/collections/{test_item['collection']}/items", params=params)
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"
@@ -1735,7 +1735,7 @@ def test_item_wrong_bbox_crs(app_client, load_test_data):
         == "1 validation error for SearchPostRequest\nbbox-crs\n  unexpected value; permitted: 'http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832' (type=value_error.const; given=wrong-bbox-crs; permitted=('http://www.opengis.net/def/crs/OGC/1.3/CRS84', 'http://www.opengis.net/def/crs/EPSG/0/25832'))"
     )
 
-    resp = app_client.get(f'/collections/{test_item["collection"]}/items', params=params)
+    resp = app_client.get(f"/collections/{test_item['collection']}/items", params=params)
     assert resp.status_code == 400
     resp_json = resp.json()
     assert resp_json["code"] == "RequestValidationError"

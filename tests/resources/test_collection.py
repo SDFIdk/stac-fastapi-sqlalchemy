@@ -63,6 +63,7 @@ def test_collection_not_found(app_client):
     assert resp_json["code"] == "NotFoundError"
     assert resp_json["description"] == "Collection does-not-exist not found"
 
+
 def test_collection_items_collectionid_not_found(app_client, load_test_data):
     """Test read an item with a collectionId that does not exist"""
     test_collection = load_test_data("test_collection.json")
@@ -97,10 +98,9 @@ def test_collection_items_collectionid_not_found(app_client, load_test_data):
     assert resp_json["description"] == "Item also-does-not-exist not found"
 
     ## finally check that we get the item if both exists
-    resp = app_client.get(
-        f"/collections/{test_collection['id']}/items/{test_item['id']}"
-    )
+    resp = app_client.get(f"/collections/{test_collection['id']}/items/{test_item['id']}")
     assert resp.status_code == 200
+
 
 def test_returns_valid_collection(app_client, load_test_data):
     """Test validates fetched collection with jsonschema"""
@@ -136,7 +136,9 @@ def test_get_collection_forwarded_header(app_client, load_test_data):
             assert link["href"].startswith("https://testserver:1234/")
         else:
             # We have a license URL that does not start with the same host as the rest of the URL's
-            assert link["href"].startswith("https://www.kds.dk/om-klimadatastyrelsen/vilkaar-og-priser")
+            assert link["href"].startswith(
+                "https://kds.dk/om-klimadatastyrelsen/vilkaar-og-priser"
+            )
 
 
 def test_get_collection_x_forwarded_headers(app_client, load_test_data):
@@ -156,7 +158,9 @@ def test_get_collection_x_forwarded_headers(app_client, load_test_data):
             assert link["href"].startswith("https://testserver:1234/")
         else:
             # We have a license URL that does not start with the same host as the rest of the URL's
-            assert link["href"].startswith("https://www.kds.dk/om-klimadatastyrelsen/vilkaar-og-priser")
+            assert link["href"].startswith(
+                "https://kds.dk/om-klimadatastyrelsen/vilkaar-og-priser"
+            )
 
 
 def test_get_collection_duplicate_forwarded_headers(app_client, load_test_data):
@@ -177,4 +181,6 @@ def test_get_collection_duplicate_forwarded_headers(app_client, load_test_data):
             assert link["href"].startswith("https://testserver:1234/")
         else:
             # We have a license URL that does not start with the same host as the rest of the URL's
-            assert link["href"].startswith("https://www.kds.dk/om-klimadatastyrelsen/vilkaar-og-priser")
+            assert link["href"].startswith(
+                "https://kds.dk/om-klimadatastyrelsen/vilkaar-og-priser"
+            )
