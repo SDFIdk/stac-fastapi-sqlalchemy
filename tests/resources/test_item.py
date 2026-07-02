@@ -1799,7 +1799,7 @@ def test_get_item_forwarded_header(app_client, load_test_data):
             assert link["href"].startswith("https://api.dataforsyningen.dk/")
         else:
             # We have a license URL that does not start with the same host as the rest of the URL's
-            assert link["href"].startswith("https://www.kds.dk")
+            assert link["href"].startswith("https://www.klimadatastyrelsen.dk")
 
 
 def test_get_item_x_forwarded_headers(app_client, load_test_data):
@@ -1831,7 +1831,7 @@ def test_get_item_x_forwarded_headers(app_client, load_test_data):
             )
         else:
             # We have a license URL that does not start with the same host as the rest of the URL's
-            assert link["href"].startswith("https://www.kds.dk")
+            assert link["href"].startswith("https://www.klimadatastyrelsen.dk")
 
 
 def test_get_item_duplicate_forwarded_headers(app_client, load_test_data):
@@ -1850,4 +1850,4 @@ def test_get_item_duplicate_forwarded_headers(app_client, load_test_data):
             assert link["href"].startswith("https://api.dataforsyningen.dk/")
         else:
             # We have a license URL that does not start with the same host as the rest of the URL's
-            assert link["href"].startswith("https://www.kds.dk")
+            assert link["href"].startswith("https://www.klimadatastyrelsen.dk")

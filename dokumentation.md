@@ -61,7 +61,7 @@ Selve APIet, der udstiller metadata i form af [STAC Items](#stac-item) organiser
     "license": "various",
     "providers": [
         {
-            "url": "https://www.kds.dk",
+            "url": "https://www.klimadatastyrelsen.dk",
             "name": "KDS",
             "roles": [
                 "host",
@@ -189,7 +189,7 @@ Dataelementerne returneret i en `Collection` er beskrevet i [STAC Collection Spe
                 ]
             },
             {
-                "url": "https://www.kds.dk",
+                "url": "https://www.klimadatastyrelsen.dk",
                 "name": "KDS",
                 "roles": [
                     "licensor",
@@ -1053,7 +1053,7 @@ Content-Type: application/geo+json
                         ]
                     },
                     {
-                        "url": "https://www.kds.dk",
+                        "url": "https://www.klimadatastyrelsen.dk",
                         "name": "KDS",
                         "roles": [
                             "licensor",
@@ -1257,7 +1257,7 @@ Content-Type: application/geo+json
                         ]
                     },
                     {
-                        "url": "https://www.kds.dk",
+                        "url": "https://www.klimadatastyrelsen.dk",
                         "name": "KDS",
                         "roles": [
                             "licensor",
@@ -1462,7 +1462,7 @@ Content-Type: application/geo+json
                         ]
                     },
                     {
-                        "url": "https://www.kds.dk",
+                        "url": "https://www.klimadatastyrelsen.dk",
                         "name": "KDS",
                         "roles": [
                             "licensor",

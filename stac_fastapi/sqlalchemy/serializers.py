@@ -97,7 +97,7 @@ class ItemSerializer(Serializer):
         add_links = [
             {
                 "rel": "license",
-                "href": "https://www.kds.dk/om-klimadatastyrelsen/vilkaar-og-priser",
+                "href": "https://www.klimadatastyrelsen.dk/om-klimadatastyrelsen/vilkaar-og-priser",
                 "type": "text/html; charset=UTF-8",
                 "title": "KDS license terms",
             },
@@ -151,7 +151,7 @@ class ItemSerializer(Serializer):
         cls._add_if_not_none(properties, "instruments", [instrument_id])
         properties["providers"] = [
             {"name": db_model.producer, "roles": ["producer"]},
-            {"url": "https://www.kds.dk", "name": "KDS", "roles": ["licensor", "host"]},
+            {"url": "https://www.klimadatastyrelsen.dk", "name": "KDS", "roles": ["licensor", "host"]},
         ]    
 
         # Proj: https://github.com/stac-extensions/projection
