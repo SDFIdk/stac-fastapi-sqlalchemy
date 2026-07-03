@@ -1,6 +1,7 @@
 from typing import List, Tuple
 from stac_fastapi.sqlalchemy.extensions.filter import BaseQueryables, SkraafotosProperties
 
+
 class Queryables:
     # TODO: Get collections from database
     base_queryables = [q.value for q in BaseQueryables]
@@ -9,6 +10,7 @@ class Queryables:
         "skraafotos2019": SkraafotosProperties,
         "skraafotos2021": SkraafotosProperties,
         "skraafotos2023": SkraafotosProperties,
+        "skraafotos2025": SkraafotosProperties,
     }
 
     @classmethod
