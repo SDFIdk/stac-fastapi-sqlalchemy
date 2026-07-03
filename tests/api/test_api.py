@@ -351,11 +351,13 @@ def test_app_sort_extension( app_client):
     get_params = {
         "collections": "skraafotos2021",
         "sortby": "+datetime",
+        "limit": 2,
     }
 
     post_params = {
         "collections": ["skraafotos2021"],
         "sortby": [{"field": "datetime", "direction": "asc"}],
+        "limit": 2,
     }
 
     resp = app_client.get("/search", params=get_params)
