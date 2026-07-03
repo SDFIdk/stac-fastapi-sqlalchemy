@@ -667,12 +667,13 @@ def test_item_search_sort_get_no_prefix(app_client, load_test_data):
     """Test GET search with sorting with no default prefix(sort extension)"""
     first_item = load_test_data("test_item.json")
 
-    params = {"collections": [first_item["collection"]], "sortby": "datetime"}
+    params = {"collections": [first_item["collection"]], "sortby": "-datetime"}
     resp = app_client.get("/search", params=params)
     assert resp.status_code == 200
     resp_json = resp.json()
-    assert resp_json["features"][0]["id"] == "2021_85_45_1_0045_00000003"
-    assert resp_json["features"][1]["id"] == "2021_85_45_2_0045_00000003"
+
+    assert resp_json["features"][0]["id"] == "2021_82_20_1_0001_00005355"
+    assert resp_json["features"][1]["id"] == "2021_82_20_2_0001_00005355"
 
 
 def test_item_search_sort_datetime_asc_id_desc_get(app_client, load_test_data):
